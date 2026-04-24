@@ -1,0 +1,64 @@
+{
+  "expo": {
+    "name": "Rihla",
+    "slug": "rihla",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1B3A5C"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.rihla.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Rihla needs camera access to scan QR codes for attendance",
+        "NSPhotoLibraryUsageDescription": "Rihla needs photo library access to upload profile pictures"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#1B3A5C"
+      },
+      "package": "com.rihla.app",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE"
+      ]
+    },
+    "plugins": [
+      "expo-dev-client",
+      "expo-secure-store",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Rihla needs camera access to scan QR codes for attendance"
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#2E75B6"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Rihla needs photo library access to upload profile pictures"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "rihla-mobile"
+      }
+    }
+  }
+}
