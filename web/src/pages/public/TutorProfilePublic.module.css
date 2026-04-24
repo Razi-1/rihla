@@ -1,0 +1,204 @@
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-6);
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--text-body-sm);
+  margin-bottom: var(--space-6);
+}
+
+.back:hover { color: var(--color-primary-blue); }
+
+.layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--space-8);
+  align-items: start;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.profileCard {
+  background: var(--color-surface-card);
+  border-radius: var(--radius-md);
+  padding: var(--space-8);
+  box-shadow: var(--shadow-md);
+}
+
+.profileTop {
+  display: flex;
+  gap: var(--space-6);
+  align-items: flex-start;
+  margin-bottom: var(--space-6);
+}
+
+.profileInfo h1 {
+  font-size: var(--text-h2);
+  margin-bottom: var(--space-2);
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-text-muted);
+  font-size: var(--text-body-sm);
+  margin-bottom: var(--space-2);
+}
+
+.meta span {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.ratingRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.ratingText {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+}
+
+.section {
+  margin-top: var(--space-6);
+}
+
+.section h2 {
+  font-size: var(--text-title-lg);
+  margin-bottom: var(--space-3);
+}
+
+.section p {
+  line-height: 1.7;
+  color: var(--color-text-body);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.sentiment {
+  font-style: italic;
+  color: var(--color-text-muted);
+}
+
+.aside {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  position: sticky;
+  top: calc(var(--header-height) + var(--space-8));
+}
+
+.pricingCard, .hoursCard {
+  background: var(--color-surface-card);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-md);
+}
+
+.pricingCard h3, .hoursCard h3 {
+  font-size: var(--text-title-md);
+  margin-bottom: var(--space-4);
+}
+
+.priceRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-body-md);
+  color: var(--color-text-heading);
+  font-weight: 500;
+  margin-bottom: var(--space-3);
+}
+
+.pricingCard a {
+  display: block;
+  margin-top: var(--space-4);
+  text-decoration: none;
+}
+
+.hourRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-body);
+  padding: var(--space-2) 0;
+}
+
+.hourTime {
+  margin-left: auto;
+  color: var(--color-text-muted);
+}
+
+.reviewsSection h2 {
+  font-size: var(--text-title-lg);
+  margin-bottom: var(--space-4);
+}
+
+.reviewList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.reviewCard {
+  background: var(--color-surface-card);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-sm);
+}
+
+.reviewHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.reviewerName {
+  font-weight: 500;
+  font-size: var(--text-body-sm);
+  display: block;
+}
+
+.reviewDate {
+  font-size: var(--text-label-sm);
+  color: var(--color-text-muted);
+  display: block;
+}
+
+.reviewText {
+  font-size: var(--text-body-sm);
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .profileTop {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .meta { justify-content: center; }
+  .ratingRow { justify-content: center; }
+}

@@ -1,0 +1,49 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.label {
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  color: var(--color-text-heading);
+}
+
+.textarea {
+  background: var(--color-surface-low);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  font-size: var(--text-body-md);
+  color: var(--color-on-surface);
+  resize: vertical;
+  min-height: 100px;
+  outline: none;
+  transition: all var(--transition-fast);
+  font-family: var(--font-family);
+}
+
+.textarea:focus {
+  background: var(--color-surface-card);
+  box-shadow: 0 0 0 1px var(--color-primary-blue);
+}
+
+.textarea.hasError {
+  background: var(--color-error-light);
+  box-shadow: 0 0 0 1px var(--color-error);
+}
+
+.textarea::placeholder {
+  color: var(--color-text-placeholder);
+}
+
+.error {
+  font-size: var(--text-label-md);
+  color: var(--color-error);
+}
+
+.hint {
+  font-size: var(--text-label-md);
+  color: var(--color-text-muted);
+}

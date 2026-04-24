@@ -1,0 +1,126 @@
+.dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 380px;
+  max-height: 480px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  z-index: 200;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-5);
+}
+
+.header h3 {
+  font-size: var(--text-title-md);
+  font-weight: 600;
+}
+
+.markAllBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-label-md);
+  color: var(--color-primary-blue);
+  font-weight: 500;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+}
+
+.markAllBtn:hover {
+  background: var(--color-surface-low);
+}
+
+.list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-5);
+  width: 100%;
+  text-align: left;
+  transition: background var(--transition-fast);
+  cursor: pointer;
+}
+
+.item:hover {
+  background: var(--color-surface-low);
+}
+
+.item.unread {
+  background: rgba(46, 117, 182, 0.04);
+}
+
+.itemContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.itemTitle {
+  font-size: var(--text-body-sm);
+  font-weight: 600;
+  color: var(--color-text-heading);
+}
+
+.itemBody {
+  font-size: var(--text-label-md);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.itemTime {
+  font-size: var(--text-label-sm);
+  color: var(--color-text-placeholder);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-primary-blue);
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-10);
+  color: var(--color-text-placeholder);
+}
+
+.viewAll {
+  padding: var(--space-3);
+  text-align: center;
+  font-size: var(--text-body-sm);
+  color: var(--color-primary-blue);
+  font-weight: 500;
+  transition: background var(--transition-fast);
+  width: 100%;
+}
+
+.viewAll:hover {
+  background: var(--color-surface-low);
+}

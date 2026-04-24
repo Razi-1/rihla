@@ -1,0 +1,192 @@
+@import './fonts.css';
+@import './animations.css';
+
+:root {
+  /* Primary palette */
+  --color-primary: #005c9b;
+  --color-primary-navy: #1B3A5C;
+  --color-primary-blue: #2E75B6;
+  --color-accent-blue: #1F6099;
+  --color-primary-container: #2E75B6;
+  --color-primary-fixed-dim: #c2e0ff;
+  --color-on-primary-fixed: #001d36;
+
+  /* Surface hierarchy */
+  --color-surface: #F8F9FF;
+  --color-surface-low: #F2F3F9;
+  --color-surface-card: #FFFFFF;
+  --color-surface-high: #E6E8EE;
+
+  /* Blues */
+  --color-light-blue: #D6E4F0;
+  --color-mid-blue: #BDD7EE;
+
+  /* Text */
+  --color-text-body: #344054;
+  --color-text-heading: #101828;
+  --color-on-surface: #191C20;
+  --color-text-muted: #667085;
+  --color-text-placeholder: #98A2B3;
+
+  /* Secondary */
+  --color-secondary-container: #dce2f9;
+  --color-on-secondary-container: #151b2c;
+
+  /* Semantic */
+  --color-success: #12B76A;
+  --color-success-light: #ECFDF3;
+  --color-warning: #F79009;
+  --color-warning-light: #FFFAEB;
+  --color-error: #F04438;
+  --color-error-light: #FEF3F2;
+  --color-error-container: #ffdad6;
+
+  /* Outline */
+  --color-outline: rgba(25, 28, 32, 0.12);
+  --color-outline-variant: rgba(25, 28, 32, 0.15);
+
+  /* Shadows */
+  --shadow-sm: 0px 4px 12px rgba(25, 28, 32, 0.04);
+  --shadow-md: 0px 10px 30px rgba(25, 28, 32, 0.06);
+  --shadow-lg: 0px 16px 40px rgba(25, 28, 32, 0.08);
+
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* Typography */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  --text-display-lg: 2.25rem;
+  --text-display-md: 1.875rem;
+  --text-h1: 1.75rem;
+  --text-h2: 1.5rem;
+  --text-h3: 1.25rem;
+  --text-title-lg: 1.125rem;
+  --text-title-md: 1rem;
+  --text-body-lg: 1rem;
+  --text-body-md: 0.875rem;
+  --text-body-sm: 0.8125rem;
+  --text-label-md: 0.75rem;
+  --text-label-sm: 0.6875rem;
+
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-base: 200ms ease;
+  --transition-slow: 300ms ease;
+
+  /* Layout */
+  --sidebar-width: 260px;
+  --sidebar-collapsed-width: 72px;
+  --header-height: 64px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-family);
+  font-size: var(--text-body-md);
+  color: var(--color-text-body);
+  background-color: var(--color-surface);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--color-text-heading);
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+h1 { font-size: var(--text-h1); }
+h2 { font-size: var(--text-h2); }
+h3 { font-size: var(--text-h3); }
+
+a {
+  color: var(--color-primary-blue);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-accent-blue);
+}
+
+button {
+  font-family: var(--font-family);
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+input, textarea, select {
+  font-family: var(--font-family);
+  font-size: var(--text-body-md);
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary-blue);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+::selection {
+  background-color: var(--color-light-blue);
+  color: var(--color-on-surface);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-surface-high);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
