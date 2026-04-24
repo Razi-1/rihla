@@ -1,0 +1,199 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: rihla-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init-synapse-db.sql:/docker-entrypoint-initdb.d/init-synapse-db.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: rihla-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio
+    container_name: rihla-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  minio-init:
+    image: minio/mc
+    container_name: rihla-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set myminio http://minio:9000 $${MINIO_ACCESS_KEY} $${MINIO_SECRET_KEY};
+      mc mb --ignore-existing myminio/profile-pictures;
+      mc mb --ignore-existing myminio/class-materials;
+      mc mb --ignore-existing myminio/qr-codes;
+      mc anonymous set download myminio/profile-pictures;
+      exit 0;
+      "
+    environment:
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+
+  mailpit:
+    image: axllent/mailpit
+    container_name: rihla-mailpit
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama
+    container_name: rihla-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+
+  synapse:
+    image: matrixdotorg/synapse:latest
+    container_name: rihla-synapse
+    environment:
+      SYNAPSE_CONFIG_PATH: /data/homeserver.yaml
+    volumes:
+      - synapse_data:/data
+      - ./docker/synapse/homeserver.yaml:/data/homeserver.yaml
+      - ./docker/synapse/log.config:/data/log.config
+    ports:
+      - "8008:8008"
+      - "8448:8448"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  jitsi-prosody:
+    image: jitsi/prosody:stable
+    container_name: rihla-jitsi-prosody
+    environment:
+      ENABLE_AUTH: 1
+      AUTH_TYPE: jwt
+      JWT_APP_ID: rihla
+      JWT_APP_SECRET: ${JITSI_JWT_SECRET}
+      XMPP_DOMAIN: meet.jitsi
+      XMPP_AUTH_DOMAIN: auth.meet.jitsi
+      XMPP_MUC_DOMAIN: muc.meet.jitsi
+      XMPP_INTERNAL_MUC_DOMAIN: internal-muc.meet.jitsi
+      JICOFO_AUTH_PASSWORD: ${JICOFO_AUTH_PASSWORD}
+      JVB_AUTH_PASSWORD: ${JVB_AUTH_PASSWORD}
+      TZ: UTC
+    volumes:
+      - jitsi_prosody:/config
+    restart: unless-stopped
+
+  jitsi-jicofo:
+    image: jitsi/jicofo:stable
+    container_name: rihla-jitsi-jicofo
+    environment:
+      XMPP_DOMAIN: meet.jitsi
+      XMPP_AUTH_DOMAIN: auth.meet.jitsi
+      XMPP_MUC_DOMAIN: muc.meet.jitsi
+      XMPP_INTERNAL_MUC_DOMAIN: internal-muc.meet.jitsi
+      JICOFO_AUTH_PASSWORD: ${JICOFO_AUTH_PASSWORD}
+      TZ: UTC
+    depends_on:
+      - jitsi-prosody
+    volumes:
+      - jitsi_jicofo:/config
+    restart: unless-stopped
+
+  jitsi-jvb:
+    image: jitsi/jvb:stable
+    container_name: rihla-jitsi-jvb
+    environment:
+      XMPP_DOMAIN: meet.jitsi
+      XMPP_AUTH_DOMAIN: auth.meet.jitsi
+      XMPP_MUC_DOMAIN: muc.meet.jitsi
+      XMPP_INTERNAL_MUC_DOMAIN: internal-muc.meet.jitsi
+      JVB_AUTH_PASSWORD: ${JVB_AUTH_PASSWORD}
+      JVB_PORT: 10000
+      JVB_TCP_PORT: 4443
+      TZ: UTC
+    depends_on:
+      - jitsi-prosody
+    ports:
+      - "10000:10000/udp"
+      - "4443:4443"
+    volumes:
+      - jitsi_jvb:/config
+    restart: unless-stopped
+
+  jitsi-web:
+    image: jitsi/web:stable
+    container_name: rihla-jitsi-web
+    environment:
+      ENABLE_AUTH: 1
+      AUTH_TYPE: jwt
+      XMPP_DOMAIN: meet.jitsi
+      XMPP_MUC_DOMAIN: muc.meet.jitsi
+      XMPP_BOSH_URL_BASE: http://jitsi-prosody:5280
+      TZ: UTC
+    depends_on:
+      - jitsi-prosody
+    ports:
+      - "8443:443"
+    volumes:
+      - jitsi_web:/config
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+  ollama_data:
+  synapse_data:
+  jitsi_prosody:
+  jitsi_jicofo:
+  jitsi_jvb:
+  jitsi_web:
