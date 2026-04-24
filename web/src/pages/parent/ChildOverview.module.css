@@ -1,0 +1,57 @@
+.page {
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  background: var(--color-surface-card);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-md);
+}
+
+.header h1 { font-size: var(--text-h2); }
+.email { color: var(--color-text-muted); font-size: var(--text-body-sm); }
+.badges { display: flex; gap: var(--space-2); margin-top: var(--space-2); }
+
+.section {
+  background: var(--color-surface-card);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-sm);
+}
+
+.section h2 {
+  font-size: var(--text-title-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.empty { color: var(--color-text-muted); font-size: var(--text-body-sm); }
+
+.permList { display: flex; flex-direction: column; gap: var(--space-3); }
+
+.permCard {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--color-surface-low);
+  border-radius: var(--radius-sm);
+}
+
+.permInfo { flex: 1; display: flex; align-items: center; gap: var(--space-3); }
+.permName { font-weight: 500; font-size: var(--text-body-md); }
+.permActions { display: flex; gap: var(--space-2); }
+
+.classList { display: flex; flex-direction: column; gap: var(--space-2); }
+.classItem { padding: var(--space-2) 0; display: flex; align-items: center; gap: var(--space-3); }
+.classTitle { font-weight: 500; font-size: var(--text-body-md); }
+.classTutor { font-size: var(--text-body-sm); color: var(--color-text-muted); }

@@ -1,0 +1,87 @@
+.page {
+  max-width: 680px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.section {
+  background: var(--color-surface-card);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-sm);
+}
+
+.section h2 {
+  font-size: var(--text-title-lg);
+  margin-bottom: var(--space-4);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.toggles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) 0;
+  font-size: var(--text-body-md);
+  cursor: pointer;
+}
+
+.toggle input[type="checkbox"] {
+  width: 40px;
+  height: 22px;
+  appearance: none;
+  background: var(--color-surface-high);
+  border-radius: var(--radius-full);
+  position: relative;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.toggle input[type="checkbox"]::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+
+.toggle input[type="checkbox"]:checked {
+  background: var(--color-primary-blue);
+}
+
+.toggle input[type="checkbox"]:checked::after {
+  transform: translateX(18px);
+}
+
+.error {
+  font-size: var(--text-body-sm);
+  color: var(--color-error);
+}
+
+.success {
+  font-size: var(--text-body-sm);
+  color: var(--color-success);
+}
+
+.dangerText {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-4);
+}

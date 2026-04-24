@@ -1,0 +1,82 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  background: var(--color-surface-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow var(--transition-base);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.top {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.info {
+  flex: 1;
+  min-width: 0;
+}
+
+.info h3 {
+  font-size: var(--text-title-md);
+  font-weight: 600;
+}
+
+.location {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-body-sm);
+  font-weight: 600;
+  color: var(--color-text-heading);
+}
+
+.reviewCount {
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+.bio {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-body);
+  line-height: 1.6;
+}
+
+.subjects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.pricing {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--text-body-md);
+  font-weight: 600;
+  color: var(--color-primary-blue);
+}
+
+.sentiment {
+  font-size: var(--text-label-md);
+  font-weight: 400;
+  color: var(--color-text-muted);
+  font-style: italic;
+}

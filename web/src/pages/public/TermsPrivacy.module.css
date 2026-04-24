@@ -1,0 +1,28 @@
+.page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--space-12) var(--space-6);
+}
+
+.content h1 {
+  font-size: var(--text-display-md);
+  margin-bottom: var(--space-2);
+}
+
+.updated {
+  color: var(--color-text-muted);
+  font-size: var(--text-body-sm);
+  margin-bottom: var(--space-8);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  line-height: 1.8;
+}
+
+.body h2 {
+  font-size: var(--text-h3);
+  margin-top: var(--space-4);
+}

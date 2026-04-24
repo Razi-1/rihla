@@ -1,0 +1,60 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  text-decoration: none;
+  color: inherit;
+  transition: background var(--transition-fast);
+}
+
+.item:hover {
+  background: var(--color-surface-low);
+}
+
+.info {
+  flex: 1;
+  min-width: 0;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.name {
+  font-weight: 500;
+  font-size: var(--text-body-md);
+  color: var(--color-text-heading);
+}
+
+.time {
+  font-size: var(--text-label-sm);
+  color: var(--color-text-muted);
+}
+
+.bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 2px;
+}
+
+.lastMsg {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 300px;
+}
