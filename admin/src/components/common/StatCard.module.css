@@ -1,0 +1,72 @@
+.card {
+  background: var(--color-surface-card);
+  border-radius: var(--radius-md);
+  padding: 1.25rem 1.5rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.iconWrapper {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.blue {
+  background: var(--color-light-blue);
+  color: var(--color-primary-blue);
+}
+
+.red {
+  background: var(--color-admin-accent-light);
+  color: var(--color-admin-accent);
+}
+
+.green {
+  background: var(--color-success-light);
+  color: var(--color-success);
+}
+
+.orange {
+  background: var(--color-warning-light);
+  color: var(--color-warning);
+}
+
+.trend {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.trendup {
+  color: var(--color-success);
+}
+
+.trenddown {
+  color: var(--color-error);
+}
+
+.value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-text-heading);
+  letter-spacing: -0.02em;
+}
+
+.label {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
