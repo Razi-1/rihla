@@ -1,0 +1,104 @@
+.content {
+  padding: 0 2rem 2rem;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 1.25rem;
+}
+
+.profileCard {
+  background: var(--color-surface-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  grid-row: span 2;
+}
+
+.avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--color-primary-blue), var(--color-accent-blue));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.fullName {
+  font-size: 1.125rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.detailsCard,
+.actionsCard {
+  background: var(--color-surface-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.sectionTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 1rem 1.25rem;
+  background: var(--color-surface-low);
+}
+
+.fields {
+  padding: 0.5rem 0;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  color: var(--color-text-muted);
+}
+
+.fieldLabel {
+  font-size: 0.8125rem;
+  min-width: 80px;
+}
+
+.fieldValue {
+  font-size: 0.875rem;
+  color: var(--color-text-body);
+  font-weight: 500;
+}
+
+.actionButtons {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.skeleton {
+  height: 400px;
+  background: var(--color-surface-card);
+  border-radius: var(--radius-md);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}

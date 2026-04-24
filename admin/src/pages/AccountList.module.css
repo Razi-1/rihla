@@ -1,0 +1,38 @@
+.content {
+  padding: 0 2rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.filterIcon {
+  color: var(--color-text-muted);
+}
+
+.select {
+  padding: 0.4375rem 0.75rem;
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-border-ghost);
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+  color: var(--color-text-body);
+  cursor: pointer;
+  min-height: 32px;
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--color-primary-blue);
+  box-shadow: 0 0 0 3px var(--color-light-blue);
+}
+
+.name {
+  font-weight: 500;
+  color: var(--color-text-heading);
+}
