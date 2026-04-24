@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.exceptions import RateLimitError
+from app.core.rate_limiter import rate_limit_login
 from app.database import get_db
 from app.schemas.admin import AdminLoginRequest
 from app.schemas.auth import LoginRequest, RefreshRequest, TokenResponse
@@ -16,6 +18,8 @@ async def admin_login(
     response: Response,
     db: AsyncSession = Depends(get_db),
 ):
+    if not await rate_limit_login(data.email):
+        raise RateLimitError(detail="Too many login attempts. Try again in 5 minutes.")
     login_data = LoginRequest(
         email=data.email, password=data.password, account_type="admin"
     )

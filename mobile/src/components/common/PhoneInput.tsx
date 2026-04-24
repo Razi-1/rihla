@@ -26,7 +26,7 @@ export function PhoneInput({
       {label && <Text style={styles.label}>{label}</Text>}
       <View style={styles.inputRow}>
         <TextInput
-          style={[styles.codeInput, error && styles.inputError]}
+          style={[styles.codeInput, error ? styles.inputError : undefined]}
           value={countryCode}
           onChangeText={onChangeCountryCode}
           placeholder="+94"
@@ -35,7 +35,7 @@ export function PhoneInput({
           maxLength={5}
         />
         <TextInput
-          style={[styles.phoneInput, error && styles.inputError]}
+          style={[styles.phoneInput, error ? styles.inputError : undefined]}
           value={phoneNumber}
           onChangeText={onChangePhoneNumber}
           placeholder="Phone number"

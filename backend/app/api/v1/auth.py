@@ -1,7 +1,9 @@
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import CurrentUser
+from app.core.exceptions import RateLimitError
+from app.core.rate_limiter import rate_limit_login, rate_limit_register
 from app.database import get_db
 from app.schemas.auth import (
     ForgotPasswordRequest,
@@ -20,7 +22,12 @@ router = APIRouter()
 
 
 @router.post("/register", response_model=SuccessResponse)
-async def register(data: RegisterRequest, db: AsyncSession = Depends(get_db)):
+async def register(
+    data: RegisterRequest, request: Request, db: AsyncSession = Depends(get_db)
+):
+    client_ip = request.client.host if request.client else "unknown"
+    if not await rate_limit_register(client_ip):
+        raise RateLimitError(detail="Too many registration attempts. Try again later.")
     account, verification_token = await auth_service.register(db, data)
     await email_service.send_verification_email(
         account.email, verification_token, db
@@ -37,6 +44,8 @@ async def login(
     response: Response,
     db: AsyncSession = Depends(get_db),
 ):
+    if not await rate_limit_login(data.email):
+        raise RateLimitError(detail="Too many login attempts. Try again in 5 minutes.")
     token_response, raw_refresh = await auth_service.login(db, data)
     response.set_cookie(
         key="refresh_token",

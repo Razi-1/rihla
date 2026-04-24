@@ -15,30 +15,30 @@ import { formatTimeRange } from '../../utils/formatters';
 import { SESSION_TYPE_LABELS, MODE_LABELS } from '../../utils/constants';
 
 export function CalendarScreen({ navigation }: any) {
-  const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0]!);
   const [events, setEvents] = useState<CalendarEventResponse[]>([]);
   const [markedDates, setMarkedDates] = useState<Record<string, any>>({});
 
   const fetchEvents = useCallback(async (dateStr: string) => {
     const date = new Date(dateStr);
-    const start = new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split('T')[0];
-    const end = new Date(date.getFullYear(), date.getMonth() + 1, 0).toISOString().split('T')[0];
+    const start = new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split('T')[0]!;
+    const end = new Date(date.getFullYear(), date.getMonth() + 1, 0).toISOString().split('T')[0]!;
     try {
       const res = await calendarService.getEvents(start, end);
       const data = res.data.data;
       setEvents(data);
       const marks: Record<string, any> = {};
       data.forEach((ev) => {
-        const day = ev.start.split('T')[0];
+        const day = ev.start.split('T')[0]!;
         marks[day] = { marked: true, dotColor: colors.primary.blue };
       });
       setMarkedDates(marks);
     } catch {}
   }, []);
 
-  useEffect(() => { fetchEvents(selectedDate); }, []);
+  useEffect(() => { fetchEvents(selectedDate); }, [fetchEvents, selectedDate]);
 
-  const dayEvents = events.filter((e) => e.start.startsWith(selectedDate));
+  const dayEvents = events.filter((e) => e.start.split('T')[0] === selectedDate);
 
   const handleDayPress = (day: DateData) => {
     setSelectedDate(day.dateString);
@@ -57,7 +57,7 @@ export function CalendarScreen({ navigation }: any) {
         onMonthChange={handleMonthChange}
         markedDates={{
           ...markedDates,
-          [selectedDate]: { ...markedDates[selectedDate], selected: true, selectedColor: colors.primary.blue },
+          [selectedDate]: { ...(markedDates[selectedDate] ?? {}), selected: true, selectedColor: colors.primary.blue },
         }}
         theme={{
           backgroundColor: colors.surface.base,
@@ -93,7 +93,7 @@ export function CalendarScreen({ navigation }: any) {
             >
               <View style={styles.eventHeader}>
                 <Text style={styles.eventTitle} numberOfLines={1}>{ev.title}</Text>
-                <Badge text={SESSION_TYPE_LABELS[ev.session_type]} />
+                <Badge text={SESSION_TYPE_LABELS[ev.session_type] ?? ev.session_type} />
               </View>
               <View style={styles.eventMeta}>
                 <Clock size={14} color={colors.text.muted} strokeWidth={1.5} />

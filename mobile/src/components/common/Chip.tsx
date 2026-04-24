@@ -14,21 +14,33 @@ interface ChipProps {
 }
 
 export function Chip({ label, selected = false, onPress, onRemove, style }: ChipProps) {
-  const Wrapper = onPress ? TouchableOpacity : View;
-
-  return (
-    <Wrapper
-      onPress={onPress}
-      style={[styles.chip, selected && styles.chipSelected, style]}
-      activeOpacity={0.8}
-    >
+  const content = (
+    <>
       <Text style={[styles.label, selected && styles.labelSelected]}>{label}</Text>
       {onRemove && (
         <TouchableOpacity onPress={onRemove} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
           <X size={14} color={selected ? colors.primary.accent : colors.text.muted} strokeWidth={1.5} />
         </TouchableOpacity>
       )}
-    </Wrapper>
+    </>
+  );
+
+  if (onPress) {
+    return (
+      <TouchableOpacity
+        onPress={onPress}
+        style={[styles.chip, selected && styles.chipSelected, style]}
+        activeOpacity={0.8}
+      >
+        {content}
+      </TouchableOpacity>
+    );
+  }
+
+  return (
+    <View style={[styles.chip, selected && styles.chipSelected, style]}>
+      {content}
+    </View>
   );
 }
 

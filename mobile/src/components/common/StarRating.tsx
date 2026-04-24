@@ -25,21 +25,21 @@ export function StarRating({
         const filled = starIndex <= Math.floor(rating);
         const halfFilled = !filled && starIndex <= rating + 0.5;
 
-        const StarWrapper = readonly ? View : TouchableOpacity;
+        const star = (
+          <Star
+            size={size}
+            color={filled || halfFilled ? colors.semantic.warning : colors.surface.high}
+            fill={filled ? colors.semantic.warning : 'transparent'}
+            strokeWidth={1.5}
+          />
+        );
 
-        return (
-          <StarWrapper
-            key={i}
-            onPress={readonly ? undefined : () => onRate?.(starIndex)}
-            style={styles.star}
-          >
-            <Star
-              size={size}
-              color={filled || halfFilled ? colors.semantic.warning : colors.surface.high}
-              fill={filled ? colors.semantic.warning : 'transparent'}
-              strokeWidth={1.5}
-            />
-          </StarWrapper>
+        return readonly ? (
+          <View key={i} style={styles.star}>{star}</View>
+        ) : (
+          <TouchableOpacity key={i} onPress={() => onRate?.(starIndex)} style={styles.star}>
+            {star}
+          </TouchableOpacity>
         );
       })}
     </View>

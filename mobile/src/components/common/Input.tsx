@@ -32,12 +32,12 @@ export function Input({
         style={[
           styles.inputContainer,
           isFocused && styles.inputFocused,
-          error && styles.inputError,
+          error ? styles.inputError : undefined,
         ]}
       >
         {leftIcon && <View style={styles.iconLeft}>{leftIcon}</View>}
         <TextInput
-          style={[styles.input, leftIcon && styles.inputWithIcon, style]}
+          style={[styles.input, leftIcon ? styles.inputWithIcon : undefined, style]}
           placeholderTextColor={colors.text.muted}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}

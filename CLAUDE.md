@@ -44,15 +44,15 @@ rihla/
 ## Current State of Progress
 - [x] Git repository initialized
 - [x] GitHub remote repository created
-- [ ] Environment setup (Docker, PostgreSQL, Node, Python venv)
-- [ ] Docker Compose configuration
-- [ ] Database schema (Alembic migrations)
-- [ ] Backend API
-- [ ] Web frontend
-- [ ] Mobile frontend
-- [ ] Admin frontend
-- [ ] ML pipeline
-- [ ] Integration testing
+- [x] Docker Compose configuration
+- [x] Backend API (FastAPI + SQLAlchemy models, services, tests — 70 tests passing)
+- [x] Web frontend (React 18 + Vite + TypeScript — compiles and builds clean)
+- [x] Mobile frontend (React Native + Expo Dev Client — TypeScript clean)
+- [x] Admin frontend (React 18 + Vite + TypeScript — compiles and builds clean)
+- [x] Security: Auth guards, rate limiting on login/register, JWT, Argon2, Fernet
+- [ ] Environment setup (Docker services running, Alembic migrations applied)
+- [ ] ML pipeline (model training and serving)
+- [ ] Integration testing (full E2E flows with running services)
 
 ## Git Conventions
 - **Branch naming:** `phase1/backend`, `phase2/web`, `phase2/mobile`, `phase2/admin`, `phase3/integration`

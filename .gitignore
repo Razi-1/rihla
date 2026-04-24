@@ -16,6 +16,8 @@ venv/
 node_modules/
 .expo/
 *.tsbuildinfo
+.vite/
+dist/
 
 # IDE
 .vscode/

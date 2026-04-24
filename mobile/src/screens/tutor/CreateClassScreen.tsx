@@ -63,14 +63,14 @@ export function CreateClassScreen({ navigation }: any) {
         <Text style={styles.label}>Session Type</Text>
         <View style={styles.chips}>
           {(['booking_meeting', 'individual_class', 'group_class'] as SessionType[]).map((t) => (
-            <Chip key={t} label={SESSION_TYPE_LABELS[t]} selected={sessionType === t} onPress={() => setSessionType(t)} />
+            <Chip key={t} label={SESSION_TYPE_LABELS[t] ?? t} selected={sessionType === t} onPress={() => setSessionType(t)} />
           ))}
         </View>
 
         <Text style={styles.label}>Mode</Text>
         <View style={styles.chips}>
           {(['online', 'physical', 'hybrid'] as Mode[]).map((m) => (
-            <Chip key={m} label={MODE_LABELS[m]} selected={mode === m} onPress={() => setMode(m)} />
+            <Chip key={m} label={MODE_LABELS[m] ?? m} selected={mode === m} onPress={() => setMode(m)} />
           ))}
         </View>
 

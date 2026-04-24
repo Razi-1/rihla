@@ -1,8 +1,11 @@
+import logging
 import time
 
 import redis.asyncio as redis
 
 from app.config import settings
+
+logger = logging.getLogger(__name__)
 
 redis_client: redis.Redis | None = None
 
@@ -26,17 +29,21 @@ async def check_rate_limit(
     max_requests: int,
     window_seconds: int,
 ) -> bool:
-    r = await get_redis()
-    current_time = int(time.time())
-    window_key = f"rate_limit:{key}:{current_time // window_seconds}"
+    try:
+        r = await get_redis()
+        current_time = int(time.time())
+        window_key = f"rate_limit:{key}:{current_time // window_seconds}"
 
-    pipe = r.pipeline()
-    pipe.incr(window_key)
-    pipe.expire(window_key, window_seconds)
-    results = await pipe.execute()
+        pipe = r.pipeline()
+        pipe.incr(window_key)
+        pipe.expire(window_key, window_seconds)
+        results = await pipe.execute()
 
-    current_count = results[0]
-    return current_count <= max_requests
+        current_count = results[0]
+        return current_count <= max_requests
+    except (redis.ConnectionError, redis.TimeoutError, OSError):
+        logger.warning("Redis unavailable for rate limiting — allowing request")
+        return True
 
 
 async def rate_limit_login(identifier: str) -> bool:

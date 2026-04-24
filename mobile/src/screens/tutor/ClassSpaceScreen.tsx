@@ -61,8 +61,8 @@ export function ClassSpaceScreen({ route, navigation }: any) {
           <>
             <View style={[styles.card, shadow.sm]}>
               <View style={styles.badges}>
-                <Badge text={SESSION_TYPE_LABELS[session.session_type]} />
-                <Badge text={MODE_LABELS[session.mode]} variant="neutral" />
+                <Badge text={SESSION_TYPE_LABELS[session.session_type] ?? session.session_type} />
+                <Badge text={MODE_LABELS[session.mode] ?? session.mode} variant="neutral" />
                 <Badge text={session.status} variant={session.status === 'active' ? 'success' : 'neutral'} />
               </View>
               <Text style={styles.detailText}>{formatDate(session.start_time)}</Text>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
-import { CameraView, useCameraPermissions } from 'expo-camera';
+import { Camera } from 'expo-camera';
 import { MotiView } from 'moti';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
@@ -16,7 +16,7 @@ interface QRScannerProps {
 }
 
 export function QRScanner({ onScan, isProcessing }: QRScannerProps) {
-  const [permission, requestPermission] = useCameraPermissions();
+  const [permission, requestPermission] = Camera.useCameraPermissions();
   const [scanned, setScanned] = useState(false);
 
   if (!permission) {
@@ -41,10 +41,10 @@ export function QRScanner({ onScan, isProcessing }: QRScannerProps) {
 
   return (
     <View style={styles.container}>
-      <CameraView
+      <Camera
         style={styles.camera}
-        barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
-        onBarcodeScanned={handleBarCodeScanned}
+        barCodeScannerSettings={{ barCodeTypes: ['qr'] }}
+        onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
       >
         <View style={styles.overlay}>
           <View style={styles.topOverlay} />
@@ -70,7 +70,7 @@ export function QRScanner({ onScan, isProcessing }: QRScannerProps) {
             </Text>
           </View>
         </View>
-      </CameraView>
+      </Camera>
     </View>
   );
 }
