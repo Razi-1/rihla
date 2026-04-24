@@ -1,5 +1,14 @@
 import asyncio
+import os
 from datetime import date
+
+os.environ.setdefault("JWT_SECRET_KEY", "test-jwt-secret-not-for-production")
+os.environ.setdefault("JWT_REFRESH_SECRET_KEY", "test-jwt-refresh-secret-not-for-production")
+os.environ.setdefault("HMAC_SECRET_KEY", "test-hmac-secret-not-for-production")
+os.environ.setdefault("CSRF_SECRET_KEY", "test-csrf-secret-not-for-production")
+os.environ.setdefault("JITSI_JWT_SECRET", "test-jitsi-secret-not-for-production")
+os.environ.setdefault("MINIO_ACCESS_KEY", "test-minio-access")
+os.environ.setdefault("MINIO_SECRET_KEY", "test-minio-secret")
 
 import pytest
 import pytest_asyncio

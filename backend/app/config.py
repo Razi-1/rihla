@@ -16,34 +16,34 @@ class Settings(BaseSettings):
     ADMIN_URL: str = "https://localhost:3001"
     API_URL: str = "https://localhost:8000"
 
-    DATABASE_URL: str = "postgresql+asyncpg://rihla:***REMOVED_PASSWORD***@localhost:5432/rihla"
+    DATABASE_URL: str = "postgresql+asyncpg://rihla:password@localhost:5432/rihla"
 
     REDIS_URL: str = "redis://localhost:6379/0"
 
-    JWT_SECRET_KEY: str = "***REMOVED_SECRET***"
-    JWT_REFRESH_SECRET_KEY: str = "***REMOVED_SECRET***"
+    JWT_SECRET_KEY: str = ""
+    JWT_REFRESH_SECRET_KEY: str = ""
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     JWT_REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     JWT_ALGORITHM: str = "HS256"
 
-    FERNET_ENCRYPTION_KEY: str = "***REMOVED_FERNET_KEY***"
-    HMAC_SECRET_KEY: str = "***REMOVED_SECRET***"
-    CSRF_SECRET_KEY: str = "***REMOVED_SECRET***"
+    FERNET_ENCRYPTION_KEY: str = ""
+    HMAC_SECRET_KEY: str = ""
+    CSRF_SECRET_KEY: str = ""
 
     MATRIX_HOMESERVER_URL: str = "https://localhost:8448"
     MATRIX_SERVER_NAME: str = "localhost"
     MATRIX_ADMIN_TOKEN: str = ""
 
     JITSI_URL: str = "https://localhost:8443"
-    JITSI_JWT_SECRET: str = "***REMOVED_SECRET***"
+    JITSI_JWT_SECRET: str = ""
     JITSI_APP_ID: str = "rihla"
 
     OLLAMA_BASE_URL: str = "http://localhost:11434"
     OLLAMA_MODEL: str = "gemma4:e4b"
 
     MINIO_ENDPOINT: str = "localhost:9000"
-    MINIO_ACCESS_KEY: str = "***REMOVED_SECRET***"
-    MINIO_SECRET_KEY: str = "***REMOVED_SECRET***"
+    MINIO_ACCESS_KEY: str = ""
+    MINIO_SECRET_KEY: str = ""
     MINIO_SECURE: bool = False
     MINIO_BUCKET_PROFILES: str = "profile-pictures"
     MINIO_BUCKET_MATERIALS: str = "class-materials"
