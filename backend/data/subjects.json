@@ -1,0 +1,82 @@
+{
+  "education_levels": [
+    {"name": "Primary", "min_age": 5, "max_age": 11},
+    {"name": "Lower Secondary", "min_age": 11, "max_age": 14},
+    {"name": "O-Level", "min_age": 14, "max_age": 17},
+    {"name": "A-Level", "min_age": 16, "max_age": 20},
+    {"name": "University", "min_age": 17, "max_age": null}
+  ],
+  "categories": [
+    {
+      "name": "Mathematics",
+      "subjects": [
+        {"name": "Mathematics", "levels": ["Primary", "Lower Secondary", "O-Level", "A-Level", "University"]},
+        {"name": "Further Mathematics", "levels": ["A-Level", "University"]},
+        {"name": "Statistics", "levels": ["A-Level", "University"]}
+      ]
+    },
+    {
+      "name": "Sciences",
+      "subjects": [
+        {"name": "Science", "levels": ["Primary", "Lower Secondary"]},
+        {"name": "Biology", "levels": ["O-Level", "A-Level", "University"]},
+        {"name": "Chemistry", "levels": ["O-Level", "A-Level", "University"]},
+        {"name": "Physics", "levels": ["O-Level", "A-Level", "University"]},
+        {"name": "Environmental Science", "levels": ["O-Level", "A-Level"]}
+      ]
+    },
+    {
+      "name": "Languages",
+      "subjects": [
+        {"name": "English Language", "levels": ["Primary", "Lower Secondary", "O-Level", "A-Level"]},
+        {"name": "English Literature", "levels": ["O-Level", "A-Level", "University"]},
+        {"name": "Sinhala", "levels": ["Primary", "Lower Secondary", "O-Level", "A-Level"]},
+        {"name": "Tamil", "levels": ["Primary", "Lower Secondary", "O-Level", "A-Level"]},
+        {"name": "Urdu", "levels": ["Primary", "Lower Secondary", "O-Level", "A-Level"]},
+        {"name": "Arabic", "levels": ["Primary", "Lower Secondary", "O-Level", "A-Level"]},
+        {"name": "French", "levels": ["O-Level", "A-Level", "University"]}
+      ]
+    },
+    {
+      "name": "Humanities",
+      "subjects": [
+        {"name": "History", "levels": ["Lower Secondary", "O-Level", "A-Level", "University"]},
+        {"name": "Geography", "levels": ["Lower Secondary", "O-Level", "A-Level"]},
+        {"name": "Economics", "levels": ["O-Level", "A-Level", "University"]},
+        {"name": "Business Studies", "levels": ["O-Level", "A-Level", "University"]},
+        {"name": "Accounting", "levels": ["O-Level", "A-Level", "University"]}
+      ]
+    },
+    {
+      "name": "Technology",
+      "subjects": [
+        {"name": "Computer Science", "levels": ["O-Level", "A-Level", "University"]},
+        {"name": "Information Technology", "levels": ["O-Level", "A-Level"]},
+        {"name": "Design & Technology", "levels": ["O-Level", "A-Level"]}
+      ]
+    },
+    {
+      "name": "Arts",
+      "subjects": [
+        {"name": "Art & Design", "levels": ["Primary", "Lower Secondary", "O-Level", "A-Level"]},
+        {"name": "Music", "levels": ["Primary", "Lower Secondary", "O-Level", "A-Level"]},
+        {"name": "Drama", "levels": ["O-Level", "A-Level"]}
+      ]
+    },
+    {
+      "name": "Islamic Studies",
+      "subjects": [
+        {"name": "Islamic Studies", "levels": ["Primary", "Lower Secondary", "O-Level", "A-Level"]},
+        {"name": "Quran & Tajweed", "levels": ["Primary", "Lower Secondary", "O-Level"]}
+      ]
+    },
+    {
+      "name": "Test Preparation",
+      "subjects": [
+        {"name": "SAT Preparation", "levels": ["A-Level"]},
+        {"name": "IELTS Preparation", "levels": ["A-Level", "University"]},
+        {"name": "TOEFL Preparation", "levels": ["A-Level", "University"]}
+      ]
+    }
+  ]
+}

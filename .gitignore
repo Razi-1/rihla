@@ -1,0 +1,45 @@
+# Environment
+.env
+*.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+*.db
+
+# Node
+node_modules/
+.expo/
+*.tsbuildinfo
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Certificates
+mkcert/
+
+# ML Models (generated, not committed)
+backend/data/models/*.pkl
+
+# Firebase credentials
+firebase-credentials.json
+
+# Docker volumes (local only)
+docker-data/
