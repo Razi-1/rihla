@@ -1,12 +1,39 @@
 .hero {
+  position: relative;
   background: linear-gradient(135deg, var(--color-primary-navy), var(--color-primary));
   padding: var(--space-24) var(--space-8) var(--space-20);
   text-align: center;
+  overflow: hidden;
+}
+
+.heroGlow {
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 400px;
+  background: radial-gradient(ellipse, rgba(46, 117, 182, 0.25) 0%, transparent 70%);
+  pointer-events: none;
 }
 
 .heroContent {
+  position: relative;
+  z-index: 1;
   max-width: 720px;
   margin: 0 auto;
+}
+
+.heroBadge {
+  display: inline-block;
+  padding: var(--space-1) var(--space-4);
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  margin-bottom: var(--space-6);
+  backdrop-filter: blur(8px);
 }
 
 .heroContent h1 {
@@ -41,13 +68,15 @@
   border-radius: var(--radius-full);
   font-weight: 600;
   font-size: var(--text-body-md);
-  transition: transform var(--transition-fast);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
   text-decoration: none;
+  box-shadow: var(--shadow-md);
 }
 
 .primaryBtn:hover {
   transform: scale(1.02);
   color: var(--color-primary-navy);
+  box-shadow: var(--shadow-lg);
 }
 
 .secondaryBtn {
@@ -59,12 +88,13 @@
   font-size: var(--text-body-md);
   color: #fff;
   background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
   transition: all var(--transition-fast);
   text-decoration: none;
 }
 
 .secondaryBtn:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.22);
   color: #fff;
 }
 
@@ -86,7 +116,7 @@
 
 .featureGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: var(--space-6);
 }
 
@@ -96,11 +126,11 @@
   padding: var(--space-8) var(--space-6);
   text-align: left;
   box-shadow: var(--shadow-md);
-  transition: transform var(--transition-base);
+  transition: box-shadow var(--transition-base);
 }
 
 .featureCard:hover {
-  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
 }
 
 .featureIcon {
@@ -155,6 +185,12 @@
   color: #fff;
 }
 
+@media (max-width: 900px) {
+  .featureGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
   .heroContent h1 {
     font-size: var(--text-h1);
@@ -162,5 +198,11 @@
   .heroActions {
     flex-direction: column;
     align-items: center;
+  }
+}
+
+@media (max-width: 560px) {
+  .featureGrid {
+    grid-template-columns: 1fr;
   }
 }

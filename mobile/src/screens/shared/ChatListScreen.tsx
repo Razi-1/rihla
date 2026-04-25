@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Sparkles, MessageSquare } from 'lucide-react-native';
+import { Sparkles, MessageSquare, ChevronRight } from 'lucide-react-native';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing, radius } from '../../theme/spacing';
@@ -60,25 +60,35 @@ export function ChatListScreen({ navigation }: any) {
     );
   };
 
+  const aiHeader = hasAI ? (
+    <TouchableOpacity
+      style={styles.aiCard}
+      activeOpacity={0.7}
+      onPress={() => navigation.navigate('AIAssistant')}
+    >
+      <View style={styles.aiIconWrap}>
+        <Sparkles size={22} color="#fff" strokeWidth={1.5} />
+      </View>
+      <View style={styles.aiCardInfo}>
+        <Text style={styles.aiCardTitle}>AI Assistant</Text>
+        <Text style={styles.aiCardSub}>Ask questions, get study help, find tutors</Text>
+      </View>
+      <ChevronRight size={20} color={colors.text.muted} strokeWidth={1.5} />
+    </TouchableOpacity>
+  ) : null;
+
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.header}>
         <Text style={styles.title}>Messages</Text>
-        {hasAI && (
-          <TouchableOpacity
-            style={styles.aiButton}
-            onPress={() => navigation.navigate('AIAssistant')}
-          >
-            <Sparkles size={20} color={colors.primary.blue} strokeWidth={1.5} />
-          </TouchableOpacity>
-        )}
       </View>
 
       <FlatList
         data={rooms}
         keyExtractor={(item) => item.id}
         renderItem={renderRoom}
-        contentContainerStyle={rooms.length === 0 ? styles.emptyContainer : styles.list}
+        ListHeaderComponent={aiHeader}
+        contentContainerStyle={rooms.length === 0 && !hasAI ? styles.emptyContainer : styles.list}
         refreshControl={createRefreshControl({ refreshing, onRefresh })}
         ListEmptyComponent={
           !loading ? (
@@ -98,9 +108,33 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.surface.base },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing[5], paddingVertical: spacing[3] },
   title: { ...typography.h2, color: colors.text.heading },
-  aiButton: { padding: spacing[2], backgroundColor: colors.primary.light, borderRadius: radius.full },
   list: { paddingHorizontal: spacing[5] },
-  emptyContainer: { flex: 1 },
+  emptyContainer: { flex: 1, paddingHorizontal: spacing[5] },
+  aiCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[3],
+    padding: spacing[4],
+    backgroundColor: colors.surface.card,
+    borderRadius: radius.md,
+    marginBottom: spacing[4],
+    shadowColor: '#191C20',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.06,
+    shadowRadius: 30,
+    elevation: 3,
+  },
+  aiIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: colors.primary.blue,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  aiCardInfo: { flex: 1 },
+  aiCardTitle: { ...typography.labelMd, color: colors.text.heading },
+  aiCardSub: { ...typography.bodySm, color: colors.text.muted, marginTop: 2 },
   roomItem: { flexDirection: 'row', alignItems: 'center', gap: spacing[3], paddingVertical: spacing[3], backgroundColor: colors.surface.card, borderRadius: radius.md, padding: spacing[4], marginBottom: spacing[2] },
   roomInfo: { flex: 1 },
   roomName: { ...typography.labelMd, color: colors.text.heading },

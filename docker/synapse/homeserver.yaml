@@ -14,7 +14,7 @@ database:
   name: psycopg2
   args:
     user: synapse
-    password: CHANGE_ME_synapse_db_password
+    password: synapse_dev_password_2026
     database: synapse
     host: postgres
     port: 5432
@@ -26,14 +26,14 @@ log_config: "/data/log.config"
 media_store_path: /data/media_store
 uploads_path: /data/uploads
 
-registration_shared_secret: "CHANGE_ME_generate_with_python_c_import_secrets_secrets_token_hex_32"
+registration_shared_secret: "5cd060c3850722467b999a6a4cbe4d83bab33c3cf4934fffaa6e4a7578372e66"
 enable_registration: false
 enable_registration_without_verification: false
 
 report_stats: false
 
-macaroon_secret_key: "CHANGE_ME_generate_with_python_c_import_secrets_secrets_token_hex_32"
-form_secret: "CHANGE_ME_generate_with_python_c_import_secrets_secrets_token_hex_32"
+macaroon_secret_key: "01814fce01168da706bc0135fdbb5a5ff81bc1c451c6f59971f517276eb92be9"
+form_secret: "cbf4954b5c7c00871b44b84ebebbf22cb2a725091299c942247b5a823a38b356"
 signing_key_path: "/data/localhost.signing.key"
 
 trusted_key_servers:

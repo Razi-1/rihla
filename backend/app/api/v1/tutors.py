@@ -17,6 +17,47 @@ from app.services import tutor_service
 router = APIRouter()
 
 
+@router.get("/me/dashboard")
+async def get_dashboard(
+    current_user: Account = Depends(require_role("tutor")),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.services import tutor_service as ts
+    dashboard = await ts.get_tutor_dashboard(db, current_user.id)
+    return {"data": dashboard}
+
+
+@router.get("/me/preview")
+async def get_preview(
+    current_user: Account = Depends(require_role("tutor")),
+    db: AsyncSession = Depends(get_db),
+):
+    profile = await tutor_service.get_tutor_profile(db, current_user.id)
+    stats = await tutor_service.get_tutor_stats(db, current_user.id)
+    return {
+        "data": {
+            "account": {
+                "id": str(current_user.id),
+                "first_name": current_user.first_name,
+                "last_name": current_user.last_name,
+                "profile_picture_url": current_user.profile_picture_url,
+            },
+            "bio": profile.bio,
+            "mode_of_tuition": profile.mode_of_tuition,
+            "individual_rate": float(profile.individual_rate) if profile.individual_rate else None,
+            "group_rate": float(profile.group_rate) if profile.group_rate else None,
+            "currency": profile.currency,
+            "is_profile_complete": profile.is_profile_complete,
+            "timezone": profile.timezone,
+            "subjects": [],
+            "working_hours": [],
+            "average_rating": stats["average_rating"],
+            "review_count": stats["review_count"],
+            "sentiment_summary": stats.get("sentiment_summary"),
+        }
+    }
+
+
 @router.get("/me/profile", response_model=TutorProfileResponse)
 async def get_my_profile(
     current_user: Account = Depends(require_role("tutor")),

@@ -43,5 +43,8 @@ backend/data/models/*.pkl
 # Firebase credentials
 firebase-credentials.json
 
+# Synapse signing key (generated per instance)
+docker/synapse/localhost.signing.key
+
 # Docker volumes (local only)
 docker-data/

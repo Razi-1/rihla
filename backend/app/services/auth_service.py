@@ -124,11 +124,11 @@ async def register(db: AsyncSession, data: RegisterRequest) -> tuple[Account, st
     return account, raw_token
 
 
-async def login(db: AsyncSession, data: LoginRequest) -> tuple[TokenResponse, str]:
+async def login(db: AsyncSession, data: LoginRequest) -> tuple[TokenResponse, str, "Account"]:
     """Authenticate user and return tokens.
 
     Returns:
-        Tuple of (token_response, raw_refresh_token)
+        Tuple of (token_response, raw_refresh_token, account)
     """
     result = await db.execute(
         select(Account).where(
@@ -164,7 +164,7 @@ async def login(db: AsyncSession, data: LoginRequest) -> tuple[TokenResponse, st
         is_email_verified=account.is_email_verified,
         is_age_restricted=account.is_age_restricted,
     )
-    return token_response, raw_refresh
+    return token_response, raw_refresh, account
 
 
 async def refresh_access_token(

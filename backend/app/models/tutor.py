@@ -3,8 +3,7 @@ from datetime import time
 from decimal import Decimal
 
 from sqlalchemy import (
-    
-    Uuid,Boolean,
+    Boolean,
     CheckConstraint,
     ForeignKey,
     Integer,
@@ -13,6 +12,7 @@ from sqlalchemy import (
     Text,
     Time,
     UniqueConstraint,
+    Uuid,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 

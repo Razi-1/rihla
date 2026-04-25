@@ -6,6 +6,7 @@ from app.tasks.account_deletion import process_deletions
 from app.tasks.age_restriction import check_birthdays
 from app.tasks.cleanup import cleanup_expired_tokens
 from app.tasks.ml_recomputation import recompute_vectors
+from app.tasks.session_generation import generate_recurring_sessions
 
 logger = logging.getLogger(__name__)
 
@@ -17,5 +18,6 @@ def setup_scheduler() -> None:
     scheduler.add_job(process_deletions, "cron", hour=1, minute=0)
     scheduler.add_job(recompute_vectors, "cron", hour=2, minute=0)
     scheduler.add_job(cleanup_expired_tokens, "cron", hour=3, minute=0)
+    scheduler.add_job(generate_recurring_sessions, "cron", hour=4, minute=0)
     scheduler.start()
-    logger.info("Background scheduler started with 4 daily jobs")
+    logger.info("Background scheduler started with 5 daily jobs")

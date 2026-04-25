@@ -19,6 +19,19 @@ export const loginSchema = z.object({
   account_type: z.enum(['student', 'tutor', 'parent']),
 });
 
+const dobSchema = z.string().min(1, 'Date of birth is required').regex(
+  /^\d{4}-\d{2}-\d{2}$/,
+  'Use format YYYY-MM-DD',
+).refine((val) => {
+  const d = new Date(val);
+  if (isNaN(d.getTime())) return false;
+  const today = new Date();
+  let age = today.getFullYear() - d.getFullYear();
+  const m = today.getMonth() - d.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < d.getDate())) age--;
+  return age >= 7 && age <= 100;
+}, { message: 'Age must be between 7 and 100' });
+
 export const registerSchema = z.object({
   email: emailSchema,
   password: passwordSchema,
@@ -26,7 +39,7 @@ export const registerSchema = z.object({
   account_type: z.enum(['student', 'tutor', 'parent']),
   first_name: z.string().min(1, 'First name is required').max(100),
   last_name: z.string().min(1, 'Last name is required').max(100),
-  date_of_birth: z.string().min(1, 'Date of birth is required'),
+  date_of_birth: dobSchema,
   government_id: z.string().min(5, 'Government ID is required').max(50),
   id_country_code: z.string().min(2).max(3),
   phone_number: z.string().optional(),

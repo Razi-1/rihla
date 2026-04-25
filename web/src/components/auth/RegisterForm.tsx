@@ -14,6 +14,15 @@ import styles from './RegisterForm.module.css';
 
 const STEPS = ['Account Type', 'Personal Info', 'Security'];
 
+const ID_LABELS: Record<string, string> = {
+  LK: 'NIC Number',
+  PK: 'CNIC Number',
+  IN: 'Aadhaar Number',
+  US: 'SSN (last 4) or State ID',
+  GB: 'National Insurance Number',
+  AE: 'Emirates ID',
+};
+
 export default function RegisterForm() {
   const { register: registerUser } = useAuth();
   const [step, setStep] = useState(0);
@@ -25,20 +34,26 @@ export default function RegisterForm() {
     setValue,
     watch,
     trigger,
-    formState: { errors, isSubmitting },
+    clearErrors,
+    formState: { errors, isSubmitting, touchedFields },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: { account_type: '' as AccountType, id_country_code: 'LK' },
+    mode: 'onTouched',
   });
 
   const accountType = watch('account_type');
+  const idCountry = watch('id_country_code');
 
   const nextStep = async () => {
     let fieldsToValidate: (keyof RegisterFormData)[] = [];
     if (step === 0) fieldsToValidate = ['account_type'];
     else if (step === 1) fieldsToValidate = ['first_name', 'last_name', 'date_of_birth', 'government_id', 'id_country_code'];
     const valid = await trigger(fieldsToValidate);
-    if (valid) setStep(step + 1);
+    if (valid) {
+      clearErrors(['email', 'password', 'confirm_password']);
+      setStep(step + 1);
+    }
   };
 
   const onSubmit = async (data: RegisterFormData) => {
@@ -47,10 +62,22 @@ export default function RegisterForm() {
       const { confirm_password: _, ...payload } = data;
       await registerUser(payload);
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
-      setError(msg ?? 'Registration failed. Please try again.');
+      const resp = (err as { response?: { data?: { detail?: string; errors?: Record<string, string[]> } } })?.response?.data;
+      if (resp?.errors) {
+        const fieldErrors = Object.entries(resp.errors)
+          .map(([field, msgs]) => `${field}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
+          .join('. ');
+        setError(fieldErrors);
+      } else if (resp?.detail) {
+        setError(resp.detail);
+      } else {
+        setError('Could not connect to the server. Make sure the backend is running.');
+      }
     }
   };
+
+  const fieldError = (field: keyof RegisterFormData) =>
+    touchedFields[field] || Object.keys(errors).length > 3 ? errors[field]?.message : undefined;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
@@ -77,10 +104,10 @@ export default function RegisterForm() {
         {step === 1 && (
           <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className={styles.stepContent}>
             <div className={styles.row}>
-              <Input label="First Name" placeholder="First name" icon={<User size={16} strokeWidth={1.5} />} error={errors.first_name?.message} {...register('first_name')} />
-              <Input label="Last Name" placeholder="Last name" error={errors.last_name?.message} {...register('last_name')} />
+              <Input label="First Name" placeholder="First name" icon={<User size={16} strokeWidth={1.5} />} error={fieldError('first_name')} {...register('first_name')} />
+              <Input label="Last Name" placeholder="Last name" error={fieldError('last_name')} {...register('last_name')} />
             </div>
-            <Input label="Date of Birth" type="date" error={errors.date_of_birth?.message} {...register('date_of_birth')} />
+            <Input label="Date of Birth" type="date" error={fieldError('date_of_birth')} {...register('date_of_birth')} />
             <div className={styles.row}>
               <Select
                 label="ID Country"
@@ -92,10 +119,16 @@ export default function RegisterForm() {
                   { value: 'GB', label: 'United Kingdom' },
                   { value: 'AE', label: 'UAE' },
                 ]}
-                error={errors.id_country_code?.message}
+                error={fieldError('id_country_code')}
                 {...register('id_country_code')}
               />
-              <Input label="Government ID" placeholder="NIC / Passport" icon={<CreditCard size={16} strokeWidth={1.5} />} error={errors.government_id?.message} {...register('government_id')} />
+              <Input
+                label="Government ID"
+                placeholder={ID_LABELS[idCountry] || 'National ID Number'}
+                icon={<CreditCard size={16} strokeWidth={1.5} />}
+                error={fieldError('government_id')}
+                {...register('government_id')}
+              />
             </div>
             <Input label="Phone (optional)" placeholder="+94 7X XXX XXXX" icon={<Phone size={16} strokeWidth={1.5} />} {...register('phone_number')} />
           </motion.div>
@@ -103,9 +136,9 @@ export default function RegisterForm() {
 
         {step === 2 && (
           <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className={styles.stepContent}>
-            <Input label="Email" type="email" placeholder="you@example.com" icon={<Mail size={16} strokeWidth={1.5} />} error={errors.email?.message} {...register('email')} />
-            <Input label="Password" type="password" placeholder="Create a strong password" icon={<Lock size={16} strokeWidth={1.5} />} error={errors.password?.message} {...register('password')} />
-            <Input label="Confirm Password" type="password" placeholder="Confirm password" icon={<Lock size={16} strokeWidth={1.5} />} error={errors.confirm_password?.message} {...register('confirm_password')} />
+            <Input label="Email" type="email" placeholder="you@example.com" icon={<Mail size={16} strokeWidth={1.5} />} error={fieldError('email')} {...register('email')} />
+            <Input label="Password" type="password" placeholder="Create a strong password" icon={<Lock size={16} strokeWidth={1.5} />} error={fieldError('password')} {...register('password')} />
+            <Input label="Confirm Password" type="password" placeholder="Confirm password" icon={<Lock size={16} strokeWidth={1.5} />} error={fieldError('confirm_password')} {...register('confirm_password')} />
           </motion.div>
         )}
       </AnimatePresence>

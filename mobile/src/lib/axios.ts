@@ -3,7 +3,7 @@ import { getAccessToken, getRefreshToken, setAccessToken, setRefreshToken, clear
 import { TokenResponse } from '../types/auth';
 
 const API_BASE_URL = __DEV__
-  ? 'https://192.168.1.100:8000'
+  ? 'http://10.11.17.209:8000'
   : 'https://api.rihla.app';
 
 const api = axios.create({
@@ -40,7 +40,20 @@ function processQueue(error: unknown, token: string | null) {
 }
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (
+      response.data &&
+      typeof response.data === 'object' &&
+      !Array.isArray(response.data) &&
+      !('data' in response.data)
+    ) {
+      response.data = { data: response.data };
+    }
+    if (Array.isArray(response.data)) {
+      response.data = { data: response.data };
+    }
+    return response;
+  },
   async (error: AxiosError) => {
     const originalRequest = error.config;
     if (!originalRequest) return Promise.reject(error);
@@ -66,18 +79,19 @@ api.interceptors.response.use(
           return Promise.reject(error);
         }
 
-        const { data } = await axios.post<TokenResponse>(
+        const { data: rawData } = await axios.post<{ data: TokenResponse }>(
           `${API_BASE_URL}/api/v1/auth/refresh`,
           { refresh_token: refreshToken },
         );
+        const tokenData = rawData.data;
 
-        await setAccessToken(data.access_token);
-        if (data.refresh_token) {
-          await setRefreshToken(data.refresh_token);
+        await setAccessToken(tokenData.access_token);
+        if (tokenData.refresh_token) {
+          await setRefreshToken(tokenData.refresh_token);
         }
 
-        processQueue(null, data.access_token);
-        originalRequest.headers.Authorization = `Bearer ${data.access_token}`;
+        processQueue(null, tokenData.access_token);
+        originalRequest.headers.Authorization = `Bearer ${tokenData.access_token}`;
         return api(originalRequest);
       } catch (refreshError) {
         await clearAll();

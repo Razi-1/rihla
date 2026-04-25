@@ -164,6 +164,48 @@ async def get_tutor_stats(
     }
 
 
+async def get_tutor_dashboard(db: AsyncSession, account_id: uuid.UUID) -> dict:
+    from app.models.session import Session
+    from app.models.enrolment import Enrolment
+
+    session_q = (
+        select(func.count())
+        .select_from(Session)
+        .where(Session.tutor_id == account_id, Session.status == "active")
+    )
+    session_result = await db.execute(session_q)
+    total_classes = session_result.scalar() or 0
+
+    student_q = (
+        select(func.count(func.distinct(Enrolment.student_id)))
+        .select_from(Enrolment)
+        .join(Session, Enrolment.session_id == Session.id)
+        .where(Session.tutor_id == account_id, Enrolment.status == "active")
+    )
+    student_result = await db.execute(student_q)
+    active_students = student_result.scalar() or 0
+
+    profile = await get_tutor_profile(db, account_id)
+
+    steps = [
+        {"key": "bio", "label": "Add a bio", "completed": bool(profile.bio)},
+        {"key": "mode", "label": "Set tuition mode", "completed": bool(profile.mode_of_tuition)},
+        {"key": "rate", "label": "Set pricing", "completed": profile.individual_rate is not None or profile.group_rate is not None},
+        {"key": "subjects", "label": "Add subjects", "completed": len(profile.subjects) > 0 if profile.subjects else False},
+    ]
+    completed_count = sum(1 for s in steps if s["completed"])
+    profile_completeness = int((completed_count / len(steps)) * 100)
+
+    return {
+        "upcoming_sessions": 0,
+        "active_students": active_students,
+        "total_classes": total_classes,
+        "profile_completeness": profile_completeness,
+        "completion_steps": steps,
+        "next_session": None,
+    }
+
+
 async def add_contact(
     db: AsyncSession, tutor_id: uuid.UUID, contact_id: uuid.UUID, contact_type: str
 ) -> None:

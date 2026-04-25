@@ -3,9 +3,8 @@ from datetime import date, datetime
 from decimal import Decimal
 
 from sqlalchemy import (
-    
-    
-    JSON,Uuid,Boolean,
+    Uuid,
+    Boolean,
     CheckConstraint,
     Date,
     DateTime,
@@ -17,6 +16,7 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, TimestampMixin, UUIDMixin
@@ -118,7 +118,7 @@ class RecurrenceRule(Base):
         nullable=False,
     )
     frequency: Mapped[str] = mapped_column(String(20), nullable=False)
-    days_of_week: Mapped[dict] = mapped_column(JSON, nullable=False)
+    days_of_week: Mapped[dict] = mapped_column(JSONB, nullable=False)
     start_date: Mapped[date] = mapped_column(Date, nullable=False)
     end_date: Mapped[date] = mapped_column(Date, nullable=False)
     created_at: Mapped[datetime] = mapped_column(

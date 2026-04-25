@@ -23,7 +23,7 @@ async def admin_login(
     login_data = LoginRequest(
         email=data.email, password=data.password, account_type="admin"
     )
-    token_response, raw_refresh = await auth_service.login(db, login_data)
+    token_response, raw_refresh, _account = await auth_service.login(db, login_data)
     response.set_cookie(
         key="admin_refresh_token",
         value=raw_refresh,

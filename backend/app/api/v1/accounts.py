@@ -16,19 +16,19 @@ from app.services import account_service
 router = APIRouter()
 
 
-@router.get("/me", response_model=AccountResponse)
+@router.get("/me")
 async def get_me(current_user: CurrentUser):
-    return AccountResponse.model_validate(current_user)
+    return {"data": AccountResponse.model_validate(current_user).model_dump(mode="json")}
 
 
-@router.put("/me", response_model=AccountResponse)
+@router.put("/me")
 async def update_me(
     data: AccountUpdateRequest,
     current_user: CurrentUser,
     db: AsyncSession = Depends(get_db),
 ):
     updated = await account_service.update_account(db, current_user, data)
-    return AccountResponse.model_validate(updated)
+    return {"data": AccountResponse.model_validate(updated).model_dump(mode="json")}
 
 
 @router.put("/me/password", response_model=SuccessResponse)

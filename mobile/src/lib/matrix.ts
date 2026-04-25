@@ -4,7 +4,7 @@ import { getAccessToken } from './secureStore';
 let matrixClient: sdk.MatrixClient | null = null;
 
 const HOMESERVER_URL = __DEV__
-  ? 'https://192.168.1.100:8448'
+  ? 'https://10.11.17.209:8448'
   : 'https://matrix.rihla.app';
 
 export async function initMatrixClient(

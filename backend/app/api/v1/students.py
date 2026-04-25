@@ -10,6 +10,15 @@ from app.services import student_service
 router = APIRouter()
 
 
+@router.get("/me/dashboard")
+async def get_dashboard(
+    current_user: Account = Depends(require_role("student")),
+    db: AsyncSession = Depends(get_db),
+):
+    dashboard = await student_service.get_student_dashboard(db, current_user.id)
+    return {"data": dashboard}
+
+
 @router.get("/me/profile", response_model=StudentProfileResponse)
 async def get_profile(
     current_user: Account = Depends(require_role("student")),

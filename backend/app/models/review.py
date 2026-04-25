@@ -2,8 +2,7 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import (
-    
-    Uuid,Boolean,
+    Boolean,
     CheckConstraint,
     DateTime,
     ForeignKey,
@@ -12,6 +11,7 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    Uuid,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -22,6 +22,10 @@ class Review(UUIDMixin, TimestampMixin, Base):
     __tablename__ = "reviews"
     __table_args__ = (
         CheckConstraint("rating >= 1 AND rating <= 5", name="ck_reviews_rating"),
+        CheckConstraint(
+            "is_deleted = FALSE OR admin_deletion_reason IS NOT NULL",
+            name="ck_reviews_deletion_reason",
+        ),
         Index(
             "idx_reviews_tutor_active",
             "tutor_id",

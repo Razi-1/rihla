@@ -1,3 +1,3 @@
-CREATE USER synapse WITH PASSWORD 'CHANGE_ME_match_synapse_homeserver_yaml';
-CREATE DATABASE synapse OWNER synapse;
+CREATE USER synapse WITH PASSWORD 'synapse_dev_password_2026';
+CREATE DATABASE synapse OWNER synapse ENCODING 'UTF8' LC_COLLATE='C' LC_CTYPE='C' TEMPLATE template0;
 GRANT ALL PRIVILEGES ON DATABASE synapse TO synapse;

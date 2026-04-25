@@ -12,6 +12,7 @@ class SearchFilters(BaseModel):
     region_id: uuid.UUID | None = None
     country_id: uuid.UUID | None = None
     min_rating: float | None = Field(None, ge=1, le=5)
+    min_rate: Decimal | None = None
     max_rate: Decimal | None = None
     gender: str | None = None
     cursor: str | None = None

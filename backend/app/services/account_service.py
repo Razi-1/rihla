@@ -77,7 +77,20 @@ async def cancel_deletion(db: AsyncSession, account: Account) -> None:
 
 
 async def process_pending_deletions(db: AsyncSession) -> int:
-    """Process accounts past their 7-day grace period. Returns count of processed accounts."""
+    """Process accounts past their 7-day grace period.
+
+    Full cascade per Section 7.2:
+    - is_active = FALSE
+    - Review authorships CASCADE deleted (reviews become orphaned)
+    - Refresh tokens revoked
+    - Enrolments marked opted_out
+    - Future sessions cancelled with notifications
+    """
+    from app.models.enrolment import Enrolment
+    from app.models.review import ReviewAuthorship
+    from app.models.session import Session
+    from app.models.token import RefreshToken
+
     now = datetime.now(timezone.utc)
     result = await db.execute(
         select(Account).where(
@@ -89,6 +102,41 @@ async def process_pending_deletions(db: AsyncSession) -> int:
 
     for account in accounts:
         account.is_active = False
+
+        await db.execute(
+            update(RefreshToken)
+            .where(RefreshToken.account_id == account.id)
+            .values(is_revoked=True)
+        )
+
+        authorships = await db.execute(
+            select(ReviewAuthorship).where(
+                ReviewAuthorship.student_id == account.id
+            )
+        )
+        for authorship in authorships.scalars().all():
+            await db.delete(authorship)
+
+        await db.execute(
+            update(Enrolment)
+            .where(
+                Enrolment.student_id == account.id,
+                Enrolment.status == "active",
+            )
+            .values(status="opted_out", opted_out_at=now)
+        )
+
+        if account.account_type == "tutor":
+            future_sessions = await db.execute(
+                select(Session).where(
+                    Session.tutor_id == account.id,
+                    Session.status == "active",
+                    Session.start_time > now,
+                )
+            )
+            for session in future_sessions.scalars().all():
+                session.status = "cancelled"
+
         logger.info("Account %s deactivated (deletion processed)", account.id)
 
     await db.flush()

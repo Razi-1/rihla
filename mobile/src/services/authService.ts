@@ -2,29 +2,30 @@ import api from '../lib/axios';
 import {
   RegisterRequest,
   LoginRequest,
-  TokenResponse,
   ForgotPasswordRequest,
   ResetPasswordRequest,
   VerifyEmailRequest,
   RecoverEmailRequest,
 } from '../types/auth';
 import { SuccessResponse } from '../types/common';
+import { getRefreshToken } from '../lib/secureStore';
 
 export const authService = {
   register(data: RegisterRequest) {
-    return api.post<TokenResponse>('/auth/register', data);
+    return api.post('/auth/register', data);
   },
 
   login(data: LoginRequest) {
-    return api.post<TokenResponse>('/auth/login', data);
+    return api.post('/auth/login', data);
   },
 
-  logout() {
-    return api.post<SuccessResponse>('/auth/logout');
+  async logout() {
+    const refreshToken = await getRefreshToken();
+    return api.post<SuccessResponse>('/auth/logout', refreshToken ? { refresh_token: refreshToken } : {});
   },
 
   refresh(refreshToken: string) {
-    return api.post<TokenResponse>('/auth/refresh', { refresh_token: refreshToken });
+    return api.post('/auth/refresh', { refresh_token: refreshToken });
   },
 
   verifyEmail(data: VerifyEmailRequest) {

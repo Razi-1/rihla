@@ -75,7 +75,10 @@ export function RegisterScreen({ navigation }: AuthScreenProps<'Register'>) {
     setError(null);
     try {
       const { confirm_password, ...rest } = data;
-      await register({ ...rest, account_type: selectedType });
+      const result = await register({ ...rest, account_type: selectedType });
+      if (!result.autoLoggedIn) {
+        navigation.navigate('Login');
+      }
     } catch {
       // error set by hook
     }
@@ -143,7 +146,21 @@ export function RegisterScreen({ navigation }: AuthScreenProps<'Register'>) {
                   control={control}
                   name="date_of_birth"
                   render={({ field: { onChange, value } }) => (
-                    <Input label="Date of Birth" placeholder="YYYY-MM-DD" value={value} onChangeText={onChange} error={errors.date_of_birth?.message} />
+                    <Input
+                      label="Date of Birth"
+                      placeholder="YYYY-MM-DD"
+                      value={value}
+                      keyboardType="numeric"
+                      maxLength={10}
+                      onChangeText={(text) => {
+                        const digits = text.replace(/\D/g, '');
+                        let formatted = digits;
+                        if (digits.length > 4) formatted = digits.slice(0, 4) + '-' + digits.slice(4);
+                        if (digits.length > 6) formatted = digits.slice(0, 4) + '-' + digits.slice(4, 6) + '-' + digits.slice(6, 8);
+                        onChange(formatted);
+                      }}
+                      error={errors.date_of_birth?.message}
+                    />
                   )}
                 />
                 <Controller

@@ -26,21 +26,21 @@ async def create_review(
     if existing.scalar_one_or_none():
         raise ConflictError(detail="You have already reviewed this tutor")
 
-    has_enrolment = await db.execute(
-        select(Enrolment).where(
-            Enrolment.student_id == student_id,
-            Enrolment.session_id.in_(
-                select(Enrolment.session_id)
-                .join(
-                    AttendanceRecord,
-                    AttendanceRecord.session_id == Enrolment.session_id,
-                )
-                .where(AttendanceRecord.student_id == student_id)
-            ),
+    from app.models.session import Session
+
+    attended_result = await db.execute(
+        select(AttendanceRecord)
+        .join(Session, AttendanceRecord.session_id == Session.id)
+        .where(
+            AttendanceRecord.student_id == student_id,
+            Session.tutor_id == data.tutor_id,
         )
+        .limit(1)
     )
-    # Eligibility: at minimum student should have some interaction with the tutor
-    # For now we check enrolment exists with this tutor
+    if not attended_result.scalar_one_or_none():
+        raise ValidationError(
+            detail="You must attend at least 1 session with this tutor before reviewing"
+        )
 
     review = Review(
         tutor_id=data.tutor_id,

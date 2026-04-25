@@ -14,6 +14,11 @@ class ChatRoomMapping(Base):
             "room_type IN ('dm', 'broadcast')",
             name="ck_chat_room_type",
         ),
+        UniqueConstraint(
+            "account_id_1",
+            "account_id_2",
+            name="uq_chat_dm_pair",
+        ),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(

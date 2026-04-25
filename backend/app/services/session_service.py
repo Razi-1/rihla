@@ -125,14 +125,23 @@ async def update_session(
 
 async def cancel_session(
     db: AsyncSession, session_id: uuid.UUID, tutor_id: uuid.UUID
-) -> Session:
+) -> dict:
+    """Cancel a session. Returns session and whether 48h rule was triggered."""
     session = await get_session(db, session_id)
     if session.tutor_id != tutor_id:
         raise ForbiddenError(detail="Not your session")
 
+    within_48h = await is_within_48_hours(session)
+    has_students = len(session.enrolments) > 0 if session.enrolments else False
+    is_booking = session.session_type == "booking_meeting"
+
     session.status = "cancelled"
     await db.flush()
-    return session
+
+    return {
+        "session": session,
+        "within_48h": within_48h and has_students and not is_booking,
+    }
 
 
 async def is_within_48_hours(session: Session) -> bool:

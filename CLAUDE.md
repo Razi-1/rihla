@@ -193,6 +193,40 @@ API_URL=https://localhost:8000
 CORS_ORIGINS=["https://localhost:3000","https://localhost:3001"]
 ```
 
+## AUDIT MODE INSTRUCTIONS
+
+### Current State
+The codebase has been partially implemented but contains bugs, incomplete features, 
+and deviations from the specification. Some bugs have been fixed locally but not pushed. 
+DO NOT undo any existing bug fixes.
+
+### Audit Protocol
+Before making ANY changes, you must:
+
+1. **READ the spec files first** — every single one, in this order:
+   - IMPLEMENTATION_PLAN.md (complete spec: file structure, DB schema, API endpoints, business rules)
+   - DESIGN.md (design philosophy, "Academic Curator" aesthetic)
+   - Design_System.md (exact color values, typography rules)
+   - Existing_Platform_Context.md (functional requirements, user flows, ALL business logic)
+   - Previous_Project_Error_Fixes.md (known fixes — DO NOT revert these)
+   - AGENT_INSTRUCTIONS.md (agent prompts with explicit design rules)
+
+2. **Map what exists vs. what should exist** — create a checklist before writing code
+
+3. **Never assume the existing code is correct** — verify every file against the spec
+
+4. **Preserve working code** — if something already works correctly per spec, don't touch it
+
+5. **Fix one system at a time** — complete each system fully before moving to the next
+
+### What "Existing_Platform_Context.md" IS and IS NOT
+- It IS: a reference for understanding business logic, user flows, and feature requirements
+- It IS NOT: a codebase to copy from. It describes a PREVIOUS system. Rihla is a NEW build.
+- DO NOT copy implementation patterns from it. Follow IMPLEMENTATION_PLAN.md for Rihla's architecture.
+- DO NOT assume database column names, API routes, or file paths from it match Rihla's spec.
+- ONLY use it to understand: what the feature should DO, not how it was coded before.
+
+
 ## Important Constraints
 1. This is a LOCAL DEVELOPMENT setup. Server = developer's laptop (32GB RAM, RTX 4070).
 2. Expo Go CANNOT be used. Must use Expo Dev Client (custom development builds).

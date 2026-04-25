@@ -15,11 +15,15 @@ class AccountResponse(BaseModel):
     phone_number: str | None
     phone_country_code: str | None
     profile_picture_url: str | None
+    is_active: bool
+    is_restricted: bool
     is_email_verified: bool
     is_age_restricted: bool
-    is_restricted: bool
+    deletion_requested_at: datetime | None
+    deletion_scheduled_for: datetime | None
     last_login_at: datetime | None
     created_at: datetime
+    updated_at: datetime
 
     model_config = {"from_attributes": True}
 

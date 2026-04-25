@@ -2,13 +2,13 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import (
-    
-    Uuid,Boolean,
+    Boolean,
     CheckConstraint,
     DateTime,
     ForeignKey,
     String,
     UniqueConstraint,
+    Uuid,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 

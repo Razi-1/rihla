@@ -24,7 +24,16 @@ async def ai_search(
     current_user: CurrentUser,
     db: AsyncSession = Depends(get_db),
 ):
-    filters = SearchFilters(limit=data.limit, cursor=data.cursor)
+    filters = await search_service.extract_filters_from_query(
+        db, data.query, data.limit, data.cursor
+    )
+    interpretation = search_service.describe_extracted_filters(filters)
     results = await search_service.structured_search(db, filters, authenticated=True)
-    results["ai_interpretation"] = {"raw_query": data.query}
-    return results
+    return {
+        "data": {
+            "results": results["data"],
+            "interpreted_query": interpretation,
+            "next_cursor": results.get("next_cursor"),
+            "has_more": results.get("has_more", False),
+        }
+    }
