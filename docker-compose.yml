@@ -109,7 +109,6 @@ services:
       - ./docker/synapse/localhost.signing.key:/data/localhost.signing.key
     ports:
       - "8008:8008"
-      - "8448:8448"
     depends_on:
       postgres:
         condition: service_healthy

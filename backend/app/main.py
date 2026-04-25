@@ -14,12 +14,15 @@ from app.core.exceptions import (
 )
 from app.core.logging_config import setup_logging
 from app.core.rate_limiter import close_redis
+from app.tasks.scheduler import scheduler, setup_scheduler
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     setup_logging()
+    setup_scheduler()
     yield
+    scheduler.shutdown(wait=False)
     await close_redis()
 
 

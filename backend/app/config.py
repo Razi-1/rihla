@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     HMAC_SECRET_KEY: str = ""
     CSRF_SECRET_KEY: str = ""
 
-    MATRIX_HOMESERVER_URL: str = "https://localhost:8448"
+    MATRIX_HOMESERVER_URL: str = "http://localhost:8008"
     MATRIX_SERVER_NAME: str = "localhost"
     MATRIX_ADMIN_TOKEN: str = ""
 

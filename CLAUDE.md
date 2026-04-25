@@ -172,7 +172,7 @@ JITSI_JWT_SECRET=<generate-random-64-char>
 
 # Services
 REDIS_URL=redis://localhost:6379/0
-MATRIX_HOMESERVER_URL=https://localhost:8448
+MATRIX_HOMESERVER_URL=http://localhost:8008
 MATRIX_ADMIN_TOKEN=<synapse-admin-token>
 OLLAMA_BASE_URL=http://localhost:11434
 MINIO_ENDPOINT=localhost:9000

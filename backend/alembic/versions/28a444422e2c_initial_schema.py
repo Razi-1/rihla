@@ -9,6 +9,7 @@ from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
 
 
 # revision identifiers, used by Alembic.
@@ -217,6 +218,7 @@ def upgrade() -> None:
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.CheckConstraint('rating >= 1 AND rating <= 5', name='ck_reviews_rating'),
+    sa.CheckConstraint("is_deleted = FALSE OR admin_deletion_reason IS NOT NULL", name='ck_reviews_deletion_reason'),
     sa.ForeignKeyConstraint(['deleted_by_admin_id'], ['accounts.id'], ),
     sa.ForeignKeyConstraint(['tutor_id'], ['accounts.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -351,6 +353,7 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['account_id_2'], ['accounts.id'], ),
     sa.ForeignKeyConstraint(['session_id'], ['sessions.id'], ),
     sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('account_id_1', 'account_id_2', name='uq_chat_dm_pair'),
     sa.UniqueConstraint('matrix_room_id')
     )
     op.create_table('cities',
@@ -412,7 +415,7 @@ def upgrade() -> None:
     sa.Column('id', sa.Uuid(), nullable=False),
     sa.Column('session_id', sa.Uuid(), nullable=False),
     sa.Column('frequency', sa.String(length=20), nullable=False),
-    sa.Column('days_of_week', sa.JSON(), nullable=False),
+    sa.Column('days_of_week', postgresql.JSONB(), nullable=False),
     sa.Column('start_date', sa.Date(), nullable=False),
     sa.Column('end_date', sa.Date(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
