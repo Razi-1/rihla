@@ -39,8 +39,8 @@ export default function NotificationDropdown({ onClose }: Props) {
       await notificationService.markRead(n.id);
       markRead(n.id);
     }
-    if (n.entity_type && n.entity_id) {
-      navigate(`/${n.entity_type}/${n.entity_id}`);
+    if (n.related_entity_type && n.related_entity_id) {
+      navigate(`/${n.related_entity_type}/${n.related_entity_id}`);
     }
     onClose();
   };

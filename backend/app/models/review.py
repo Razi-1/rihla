@@ -23,7 +23,7 @@ class Review(UUIDMixin, TimestampMixin, Base):
     __table_args__ = (
         CheckConstraint("rating >= 1 AND rating <= 5", name="ck_reviews_rating"),
         CheckConstraint(
-            "is_deleted = FALSE OR admin_deletion_reason IS NOT NULL",
+            "is_deleted = FALSE OR admin_deletion_reason IS NOT NULL OR deleted_at IS NOT NULL",
             name="ck_reviews_deletion_reason",
         ),
         Index(

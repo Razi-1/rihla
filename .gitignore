@@ -34,6 +34,12 @@ htmlcov/
 .DS_Store
 Thumbs.db
 
+# Claude Code local settings
+.claude/
+
+# Playwright MCP session data
+.playwright-mcp/
+
 # Certificates
 mkcert/
 

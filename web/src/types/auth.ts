@@ -52,7 +52,10 @@ export interface LoginResponse {
 
 export interface RegisterResponse {
   data: {
-    account: Account;
+    account_id: string;
+    account?: Account;
+    access_token?: string;
+    refresh_token?: string;
   };
   message: string;
 }

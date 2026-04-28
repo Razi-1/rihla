@@ -28,6 +28,8 @@ class SessionCreateRequest(BaseModel):
     individual_rate_override: Decimal | None = None
     group_rate_override: Decimal | None = None
     currency_override: str | None = None
+    subject_id: uuid.UUID | None = None
+    education_level_id: uuid.UUID | None = None
     recurrence: RecurrenceRequest | None = None
     student_ids: list[uuid.UUID] | None = None
 
@@ -63,8 +65,21 @@ class SessionResponse(BaseModel):
     individual_rate_override: Decimal | None
     group_rate_override: Decimal | None
     currency_override: str | None
+    subject_id: uuid.UUID | None = None
+    education_level_id: uuid.UUID | None = None
+    subject_name: str | None = None
+    education_level_name: str | None = None
     enrolled_count: int = 0
     is_recurring: bool = False
+    is_enrolled: bool = False
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class BookMeetingRequest(BaseModel):
+    tutor_id: uuid.UUID
+    start_time: datetime
+    duration_minutes: int = Field(ge=30, le=120)
+    title: str | None = None
+    mode: str = Field(default="online", pattern="^(online|physical|hybrid)$")

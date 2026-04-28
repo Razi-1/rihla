@@ -54,12 +54,39 @@ async def get_student_dashboard(db: AsyncSession, account_id: uuid.UUID) -> dict
     pending_result = await db.execute(pending_q)
     pending_invites = pending_result.scalar() or 0
 
+    from app.models.account import Account
+
+    classes_q = (
+        select(Session, Account)
+        .join(Enrolment, Enrolment.session_id == Session.id)
+        .join(Account, Session.tutor_id == Account.id)
+        .where(
+            Enrolment.student_id == account_id,
+            Enrolment.status == "active",
+        )
+        .order_by(Session.start_time.desc())
+        .limit(10)
+    )
+    classes_result = await db.execute(classes_q)
+    active_classes_list = [
+        {
+            "id": str(session.id),
+            "title": session.title,
+            "tutor_name": f"{tutor.first_name} {tutor.last_name}",
+            "session_type": session.session_type,
+            "start_time": session.start_time.isoformat(),
+            "mode": session.mode,
+        }
+        for session, tutor in classes_result.all()
+    ]
+
     return {
         "upcoming_sessions": upcoming_sessions,
         "active_classes": active_classes,
         "pending_invites": pending_invites,
         "next_session": None,
         "recent_invites": [],
+        "active_classes_list": active_classes_list,
     }
 
 

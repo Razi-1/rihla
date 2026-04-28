@@ -16,7 +16,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    tutorService.getDashboard().then((res) => setData(res.data.data)).catch(() => {}).finally(() => setLoading(false));
+    tutorService.getDashboard().then((res) => setData(res.data.data)).catch((err) => console.error('[TutorDashboard] Failed to load:', err)).finally(() => setLoading(false));
   }, []);
 
   if (loading) return <PageTransition><div className={styles.page}><div className={styles.statsGrid}>{[1, 2, 3, 4].map((i) => <Skeleton key={i} width="100%" height={90} borderRadius="var(--radius-md)" />)}</div></div></PageTransition>;

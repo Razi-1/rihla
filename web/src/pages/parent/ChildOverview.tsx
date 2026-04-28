@@ -14,11 +14,18 @@ export default function ChildOverview() {
   const { id } = useParams<{ id: string }>();
   const [data, setData] = useState<ChildDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
-    parentService.getChild(id).then((res) => setData(res.data.data)).finally(() => setLoading(false));
+    parentService.getChild(id)
+      .then((res) => setData(res.data.data))
+      .catch((err) => {
+        console.error('[ChildOverview] Failed to load child detail:', err);
+        setError(err?.response?.data?.detail ?? 'Failed to load child details');
+      })
+      .finally(() => setLoading(false));
   }, [id]);
 
   const handlePermission = async (permId: string, status: 'granted' | 'denied') => {
@@ -28,46 +35,45 @@ export default function ChildOverview() {
       if (data) {
         setData({
           ...data,
-          tutor_permissions: data.tutor_permissions.map((p) =>
+          permissions: data.permissions.map((p) =>
             p.id === permId ? { ...p, status } : p
           ),
         });
       }
-    } catch { /* ignore */ }
+    } catch (err) {
+      console.error('[ChildOverview] Failed to update permission:', err);
+    }
     setActionLoading(null);
   };
 
   if (loading) return <PageTransition><Skeleton width="100%" height={400} borderRadius="var(--radius-md)" /></PageTransition>;
+  if (error) return <PageTransition><div style={{ padding: '2rem', color: 'var(--color-error)' }}>{error}</div></PageTransition>;
   if (!data) return <div>Child not found</div>;
-
-  const { child } = data;
 
   return (
     <PageTransition>
       <div className={styles.page}>
         <div className={styles.header}>
-          <Avatar src={child.profile_picture_url} firstName={child.first_name} lastName={child.last_name} size="xl" />
+          <Avatar src={data.profile_picture_url} firstName={data.first_name} lastName={data.last_name} size="xl" />
           <div>
-            <h1>{child.first_name} {child.last_name}</h1>
-            <p className={styles.email}>{child.email}</p>
+            <h1>{data.first_name} {data.last_name}</h1>
+            <p className={styles.email}>{data.email}</p>
             <div className={styles.badges}>
-              <Badge variant={child.status === 'active' ? 'success' : 'warning'}>{child.status}</Badge>
-              {child.is_age_restricted && <Badge variant="info">Under 15</Badge>}
+              <Badge variant={data.link_status === 'active' ? 'success' : 'warning'}>{data.link_status}</Badge>
             </div>
           </div>
         </div>
 
         <div className={styles.section}>
           <h2><Shield size={18} strokeWidth={1.5} /> Tutor Permissions</h2>
-          {data.tutor_permissions.length === 0 ? (
+          {data.permissions.length === 0 ? (
             <p className={styles.empty}>No tutor permissions to manage yet.</p>
           ) : (
             <div className={styles.permList}>
-              {data.tutor_permissions.map((perm) => (
+              {data.permissions.map((perm) => (
                 <div key={perm.id} className={styles.permCard}>
-                  <Avatar src={perm.tutor_profile_picture} firstName={perm.tutor_name.split(' ')[0] ?? ''} lastName={perm.tutor_name.split(' ')[1] ?? ''} size="md" />
                   <div className={styles.permInfo}>
-                    <span className={styles.permName}>{perm.tutor_name}</span>
+                    <span className={styles.permName}>{perm.permission_type}</span>
                     <Badge variant={perm.status === 'granted' ? 'success' : perm.status === 'denied' ? 'error' : 'warning'}>{perm.status}</Badge>
                   </div>
                   {perm.status === 'pending' && (
@@ -82,14 +88,14 @@ export default function ChildOverview() {
           )}
         </div>
 
-        {data.active_classes.length > 0 && (
+        {data.classes.length > 0 && (
           <div className={styles.section}>
             <h2>Active Classes</h2>
             <div className={styles.classList}>
-              {data.active_classes.map((c) => (
-                <div key={c.session_id} className={styles.classItem}>
+              {data.classes.map((c) => (
+                <div key={c.id} className={styles.classItem}>
                   <span className={styles.classTitle}>{c.title}</span>
-                  <span className={styles.classTutor}>with {c.tutor_name}</span>
+                  <span className={styles.classTutor}>{c.session_type}</span>
                 </div>
               ))}
             </div>

@@ -25,9 +25,11 @@ async def get_dashboard(
 ):
     children = await parent_service.get_children(db, current_user.id)
     pending = await parent_service.get_pending_permissions(db, current_user.id)
+    upcoming = await parent_service.count_upcoming_sessions(db, current_user.id)
     return ParentDashboardResponse(
         children=[ChildSummaryResponse(**c) for c in children],
         pending_permissions=len(pending),
+        upcoming_sessions_total=upcoming,
     )
 
 
@@ -48,6 +50,16 @@ async def list_children(
 ):
     children = await parent_service.get_children(db, current_user.id)
     return [ChildSummaryResponse(**c) for c in children]
+
+
+@router.get("/me/children/{student_id}")
+async def get_child(
+    student_id: uuid.UUID,
+    current_user: Account = Depends(require_role("parent")),
+    db: AsyncSession = Depends(get_db),
+):
+    child = await parent_service.get_child_detail(db, current_user.id, student_id)
+    return {"data": child}
 
 
 @router.put("/me/permissions/{permission_id}", response_model=SuccessResponse)

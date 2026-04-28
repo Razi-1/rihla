@@ -1,10 +1,10 @@
 import api from '@/lib/axios';
-import type { ApiResponse, PaginatedResponse, SuccessResponse } from '@/types/common';
+import type { ApiResponse, SuccessResponse } from '@/types/common';
 import type { SessionInvite } from '@/types/session';
 
 export const inviteService = {
-  list: (params?: Record<string, string>) =>
-    api.get<PaginatedResponse<SessionInvite>>('/invites', { params }),
+  list: () =>
+    api.get<ApiResponse<SessionInvite[]>>('/invites'),
 
   get: (id: string) =>
     api.get<ApiResponse<SessionInvite>>(`/invites/${id}`),

@@ -5,37 +5,36 @@ export interface ParentProfile {
 }
 
 export interface ChildSummary {
-  id: string;
+  student_id: string;
   first_name: string;
   last_name: string;
   profile_picture_url: string | null;
-  email: string;
-  is_age_restricted: boolean;
-  active_classes: number;
-  upcoming_sessions: number;
-  status: 'pending' | 'active';
+  link_status: 'pending' | 'active';
 }
 
 export interface ChildDetail {
-  child: ChildSummary;
-  tutor_permissions: TutorPermission[];
-  active_classes: ChildClass[];
+  student_id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  profile_picture_url: string | null;
+  link_status: 'pending' | 'active';
+  classes: ChildClass[];
+  permissions: TutorPermission[];
 }
 
 export interface TutorPermission {
   id: string;
   tutor_id: string;
-  tutor_name: string;
-  tutor_profile_picture: string | null;
-  status: 'pending' | 'granted' | 'denied';
-  created_at: string;
+  permission_type: string;
+  status: string;
 }
 
 export interface ChildClass {
-  session_id: string;
+  id: string;
   title: string;
-  tutor_name: string;
-  next_occurrence: string | null;
+  session_type: string;
+  start_time: string | null;
 }
 
 export interface ParentDashboard {

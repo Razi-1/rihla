@@ -53,6 +53,9 @@ class TutorProfile(TimestampMixin, Base):
     timezone: Mapped[str | None] = mapped_column(String(50), nullable=True)
 
     account: Mapped["Account"] = relationship(back_populates="tutor_profile")
+    country: Mapped["Country | None"] = relationship(foreign_keys=[country_id])
+    region: Mapped["Region | None"] = relationship(foreign_keys=[region_id])
+    city: Mapped["City | None"] = relationship(foreign_keys=[city_id])
     subjects: Mapped[list["TutorSubject"]] = relationship(
         back_populates="tutor_profile",
         foreign_keys="TutorSubject.tutor_id",
@@ -157,4 +160,5 @@ class TutorContact(TimestampMixin, Base):
 
 
 from app.models.account import Account  # noqa: E402
+from app.models.location import City, Country, Region  # noqa: E402
 from app.models.subject import EducationLevel, Subject  # noqa: E402

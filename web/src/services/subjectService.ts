@@ -10,5 +10,5 @@ export const subjectService = {
     api.get<ApiResponse<Subject[]>>('/subjects'),
 
   getEducationLevels: () =>
-    api.get<ApiResponse<EducationLevel[]>>('/education-levels'),
+    api.get<ApiResponse<EducationLevel[]>>('/subjects/education-levels'),
 };

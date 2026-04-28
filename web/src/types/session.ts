@@ -22,14 +22,18 @@ export interface Session {
   duration_minutes: Duration;
   start_time: string;
   end_time: string;
-  series_root_id: string | null;
   max_group_size: number | null;
   jitsi_room_name: string | null;
   individual_rate_override: number | null;
   group_rate_override: number | null;
   currency_override: string | null;
-  recurrence_rule: RecurrenceRule | null;
+  subject_id: string | null;
+  education_level_id: string | null;
+  subject_name: string | null;
+  education_level_name: string | null;
+  is_recurring: boolean;
   enrolled_count?: number;
+  is_enrolled?: boolean;
   created_at: string;
 }
 
@@ -55,6 +59,8 @@ export interface SessionCreateRequest {
   individual_rate_override?: number;
   group_rate_override?: number;
   currency_override?: string;
+  subject_id?: string;
+  education_level_id?: string;
   student_ids?: string[];
   recurrence?: RecurrenceCreateRequest;
 }
@@ -68,23 +74,28 @@ export interface RecurrenceCreateRequest {
 export interface SessionInvite {
   id: string;
   session_id: string;
-  session: Session;
   student_id: string;
   status: InviteStatus;
+  session_title: string | null;
+  session_type: SessionType | null;
+  session_mode: SessionMode | null;
+  start_time: string | null;
+  duration_minutes: number | null;
+  tutor_name: string | null;
+  location_city: string | null;
   conflict_details: Record<string, unknown> | null;
-  declined_note: string | null;
   created_at: string;
-  updated_at: string;
 }
 
 export interface Enrolment {
   id: string;
   session_id: string;
-  session: Session;
   student_id: string;
   status: EnrolmentStatus;
   enrolled_at: string;
   opted_out_at: string | null;
+  session_title: string | null;
+  tutor_name: string | null;
 }
 
 export interface AttendanceRecord {

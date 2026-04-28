@@ -40,14 +40,14 @@ async def export_audit_log(
     )
     for entry in entries:
         writer.writerow([
-            str(entry.id),
-            str(entry.admin_id),
-            entry.action_type,
-            str(entry.target_entity_id) if entry.target_entity_id else "",
-            entry.target_entity_type or "",
-            entry.reason,
-            entry.outcome,
-            entry.created_at.isoformat(),
+            str(entry["id"]),
+            str(entry["admin_id"]),
+            entry["action_type"],
+            str(entry["target_entity_id"]) if entry.get("target_entity_id") else "",
+            entry.get("target_entity_type") or "",
+            entry["reason"],
+            entry.get("outcome", "success"),
+            entry["created_at"].isoformat() if hasattr(entry["created_at"], "isoformat") else str(entry["created_at"]),
         ])
 
     output.seek(0)

@@ -44,6 +44,30 @@ class ChatRoomMapping(Base):
     )
 
 
+class ChatMessage(Base):
+    __tablename__ = "chat_messages"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, primary_key=True, default=uuid.uuid4
+    )
+    room_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("chat_room_mappings.id"), nullable=False, index=True
+    )
+    sender_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("accounts.id"), nullable=False
+    )
+    body: Mapped[str] = mapped_column(String(4000), nullable=False)
+    message_type: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="text"
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(__import__("datetime").timezone.utc),
+        nullable=False,
+        index=True,
+    )
+
+
 class JitsiRoom(Base):
     __tablename__ = "jitsi_rooms"
 

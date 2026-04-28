@@ -9,11 +9,11 @@ import {
   User,
   BookOpen,
   PlusCircle,
-  Users,
   UserPlus,
   HelpCircle,
   LogOut,
   GraduationCap,
+  Video,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useAuth } from '@/hooks/useAuth';
@@ -34,6 +34,7 @@ const navByRole: Record<AccountType, NavItem[]> = {
     { label: 'Dashboard', path: '/student/dashboard', icon: <LayoutDashboard {...iconProps} /> },
     { label: 'Find Tutors', path: '/student/search', icon: <Search {...iconProps} /> },
     { label: 'My Invites', path: '/student/invites', icon: <BookOpen {...iconProps} /> },
+    { label: 'My Sessions', path: '/sessions', icon: <Video {...iconProps} /> },
     { label: 'Calendar', path: '/calendar', icon: <Calendar {...iconProps} /> },
     { label: 'Messages', path: '/chat', icon: <MessageCircle {...iconProps} /> },
     { label: 'My Profile', path: '/student/profile', icon: <User {...iconProps} /> },
@@ -41,6 +42,7 @@ const navByRole: Record<AccountType, NavItem[]> = {
   tutor: [
     { label: 'Dashboard', path: '/tutor/dashboard', icon: <LayoutDashboard {...iconProps} /> },
     { label: 'Create Class', path: '/tutor/create-class', icon: <PlusCircle {...iconProps} /> },
+    { label: 'My Sessions', path: '/sessions', icon: <Video {...iconProps} /> },
     { label: 'Calendar', path: '/calendar', icon: <Calendar {...iconProps} /> },
     { label: 'Messages', path: '/chat', icon: <MessageCircle {...iconProps} /> },
     { label: 'Edit Profile', path: '/tutor/edit-profile', icon: <User {...iconProps} /> },
@@ -48,7 +50,6 @@ const navByRole: Record<AccountType, NavItem[]> = {
   ],
   parent: [
     { label: 'Dashboard', path: '/parent/dashboard', icon: <LayoutDashboard {...iconProps} /> },
-    { label: 'My Children', path: '/parent/dashboard', icon: <Users {...iconProps} /> },
     { label: 'Link Child', path: '/parent/link-child', icon: <UserPlus {...iconProps} /> },
     { label: 'Calendar', path: '/calendar', icon: <Calendar {...iconProps} /> },
     { label: 'Messages', path: '/chat', icon: <MessageCircle {...iconProps} /> },
@@ -75,7 +76,7 @@ export default function Sidebar() {
       <nav className={styles.nav}>
         {items.map((item) => {
           const isActive = location.pathname === item.path ||
-            (item.path !== '/calendar' && item.path !== '/chat' && location.pathname.startsWith(item.path));
+            (item.path !== '/calendar' && item.path !== '/chat' && item.path !== '/sessions' && location.pathname.startsWith(item.path));
           return (
             <NavLink
               key={item.path}

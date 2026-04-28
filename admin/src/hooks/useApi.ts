@@ -28,6 +28,7 @@ export function useApi<T>(fetcher: () => Promise<T>, deps: unknown[] = []): UseA
       })
       .catch((err: unknown) => {
         if (!cancelled) {
+          console.error('[useApi] Request failed:', err);
           const message =
             err instanceof Error ? err.message : 'An unexpected error occurred';
           setError(message);

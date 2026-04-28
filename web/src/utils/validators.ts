@@ -31,7 +31,15 @@ export const registerSchema = z.object({
   account_type: z.enum(['student', 'tutor', 'parent']),
   first_name: nameSchema,
   last_name: nameSchema,
-  date_of_birth: z.string().min(1, 'Date of birth is required'),
+  date_of_birth: z.string().min(1, 'Date of birth is required').refine((val) => {
+    const dob = new Date(val);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    if (today.getMonth() < dob.getMonth() || (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate())) {
+      age--;
+    }
+    return age >= 8 && age <= 89;
+  }, 'You must be between 8 and 89 years old to register'),
   government_id: z.string().min(1, 'Government ID is required'),
   id_country_code: z.string().min(1, 'ID country is required'),
   phone_number: z.string().optional(),

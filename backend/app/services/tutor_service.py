@@ -1,5 +1,6 @@
 import logging
 import uuid
+from datetime import datetime, timezone
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,6 +10,7 @@ from app.core.exceptions import ForbiddenError, NotFoundError
 from app.models.account import Account
 from app.models.review import Review, ReviewAuthorship
 from app.models.ml import TutorSentiment
+from app.models.subject import Subject
 from app.models.tutor import TutorContact, TutorProfile, TutorSubject, TutorWorkingHours
 from app.schemas.tutor import (
     PricingUpdateRequest,
@@ -26,7 +28,12 @@ async def get_tutor_profile(db: AsyncSession, account_id: uuid.UUID) -> TutorPro
     result = await db.execute(
         select(TutorProfile)
         .options(
-            selectinload(TutorProfile.subjects),
+            selectinload(TutorProfile.account),
+            selectinload(TutorProfile.country),
+            selectinload(TutorProfile.region),
+            selectinload(TutorProfile.city),
+            selectinload(TutorProfile.subjects).selectinload(TutorSubject.subject).selectinload(Subject.category),
+            selectinload(TutorProfile.subjects).selectinload(TutorSubject.education_level),
             selectinload(TutorProfile.working_hours),
         )
         .where(TutorProfile.account_id == account_id)
@@ -35,6 +42,65 @@ async def get_tutor_profile(db: AsyncSession, account_id: uuid.UUID) -> TutorPro
     if not profile:
         raise NotFoundError(detail="Tutor profile not found")
     return profile
+
+
+def serialize_tutor_profile(profile: TutorProfile, stats: dict) -> dict:
+    account = profile.account
+    return {
+        "account": {
+            "id": str(account.id),
+            "email": account.email,
+            "account_type": account.account_type,
+            "first_name": account.first_name,
+            "last_name": account.last_name,
+            "date_of_birth": account.date_of_birth.isoformat() if account.date_of_birth else None,
+            "gender": account.gender,
+            "phone_number": account.phone_number,
+            "phone_country_code": account.phone_country_code,
+            "profile_picture_url": account.profile_picture_url,
+            "is_active": account.is_active,
+            "is_restricted": account.is_restricted,
+            "is_email_verified": account.is_email_verified,
+            "is_age_restricted": account.is_age_restricted,
+            "created_at": account.created_at.isoformat() if account.created_at else None,
+            "updated_at": account.updated_at.isoformat() if account.updated_at else None,
+        },
+        "bio": profile.bio,
+        "mode_of_tuition": profile.mode_of_tuition,
+        "country": {"id": str(profile.country.id), "name": profile.country.name} if profile.country else None,
+        "region": {"id": str(profile.region.id), "name": profile.region.name} if profile.region else None,
+        "city": {"id": str(profile.city.id), "name": profile.city.name} if profile.city else None,
+        "individual_rate": float(profile.individual_rate) if profile.individual_rate else None,
+        "group_rate": float(profile.group_rate) if profile.group_rate else None,
+        "currency": profile.currency,
+        "is_profile_complete": profile.is_profile_complete,
+        "timezone": profile.timezone,
+        "subjects": [
+            {
+                "id": str(ts.id),
+                "subject_id": str(ts.subject_id),
+                "subject_name": ts.subject.name if ts.subject else "",
+                "category_name": ts.subject.category.name if ts.subject and ts.subject.category else "",
+                "education_level_id": str(ts.education_level_id),
+                "education_level_name": ts.education_level.name if ts.education_level else "",
+            }
+            for ts in (profile.subjects or [])
+        ],
+        "working_hours": [
+            {
+                "id": str(wh.id),
+                "day_of_week": wh.day_of_week,
+                "start_time": wh.start_time.strftime("%H:%M") if wh.start_time else None,
+                "end_time": wh.end_time.strftime("%H:%M") if wh.end_time else None,
+                "is_working": wh.is_working,
+                "timezone": wh.timezone,
+            }
+            for wh in (profile.working_hours or [])
+        ],
+        "average_rating": stats.get("average_rating"),
+        "review_count": stats.get("review_count", 0),
+        "sentiment_summary": stats.get("sentiment_summary"),
+    }
 
 
 async def update_tutor_profile(
@@ -185,6 +251,31 @@ async def get_tutor_dashboard(db: AsyncSession, account_id: uuid.UUID) -> dict:
     student_result = await db.execute(student_q)
     active_students = student_result.scalar() or 0
 
+    upcoming_q = (
+        select(func.count())
+        .select_from(Session)
+        .where(
+            Session.tutor_id == account_id,
+            Session.status == "active",
+            Session.start_time > datetime.now(timezone.utc),
+        )
+    )
+    upcoming_result = await db.execute(upcoming_q)
+    upcoming_sessions = upcoming_result.scalar() or 0
+
+    next_session_q = (
+        select(Session)
+        .where(
+            Session.tutor_id == account_id,
+            Session.status == "active",
+            Session.start_time > datetime.now(timezone.utc),
+        )
+        .order_by(Session.start_time.asc())
+        .limit(1)
+    )
+    next_session_result = await db.execute(next_session_q)
+    next_session_obj = next_session_result.scalar_one_or_none()
+
     profile = await get_tutor_profile(db, account_id)
 
     steps = [
@@ -197,12 +288,16 @@ async def get_tutor_dashboard(db: AsyncSession, account_id: uuid.UUID) -> dict:
     profile_completeness = int((completed_count / len(steps)) * 100)
 
     return {
-        "upcoming_sessions": 0,
+        "upcoming_sessions": upcoming_sessions,
         "active_students": active_students,
         "total_classes": total_classes,
         "profile_completeness": profile_completeness,
         "completion_steps": steps,
-        "next_session": None,
+        "next_session": {
+            "id": str(next_session_obj.id),
+            "title": next_session_obj.title,
+            "start_time": next_session_obj.start_time.isoformat(),
+        } if next_session_obj else None,
     }
 
 

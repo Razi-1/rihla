@@ -91,7 +91,15 @@ class Session(UUIDMixin, TimestampMixin, Base):
     currency_override: Mapped[str | None] = mapped_column(
         String(3), nullable=True
     )
+    subject_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid, ForeignKey("subjects.id", ondelete="SET NULL"), nullable=True
+    )
+    education_level_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid, ForeignKey("education_levels.id", ondelete="SET NULL"), nullable=True
+    )
 
+    subject: Mapped["Subject | None"] = relationship(lazy="selectin")
+    education_level: Mapped["EducationLevel | None"] = relationship(lazy="selectin")
     recurrence_rule: Mapped["RecurrenceRule"] = relationship(
         back_populates="session", uselist=False
     )
@@ -164,3 +172,4 @@ class OccurrenceException(Base):
 
 from app.models.enrolment import Enrolment  # noqa: E402
 from app.models.invite import SessionInvite  # noqa: E402
+from app.models.subject import EducationLevel, Subject  # noqa: E402

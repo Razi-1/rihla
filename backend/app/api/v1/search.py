@@ -24,14 +24,15 @@ async def ai_search(
     current_user: CurrentUser,
     db: AsyncSession = Depends(get_db),
 ):
+    limit = min(data.limit, 10)
     filters = await search_service.extract_filters_from_query(
-        db, data.query, data.limit, data.cursor
+        db, data.query, limit, data.cursor
     )
     interpretation = search_service.describe_extracted_filters(filters)
     results = await search_service.structured_search(db, filters, authenticated=True)
     return {
         "data": {
-            "results": results["data"],
+            "results": results["data"][:10],
             "interpreted_query": interpretation,
             "next_cursor": results.get("next_cursor"),
             "has_more": results.get("has_more", False),

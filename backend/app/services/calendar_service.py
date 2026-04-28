@@ -16,6 +16,7 @@ async def get_calendar_events(
     end: datetime,
 ) -> list[dict]:
     events = []
+    sessions: list[Session] = []
 
     if account.account_type == "tutor":
         result = await db.execute(
@@ -26,8 +27,7 @@ async def get_calendar_events(
                 Session.status.in_(["active", "draft"]),
             )
         )
-        for session in result.scalars().all():
-            events.append(_session_to_event(session, "tutor"))
+        sessions = list(result.scalars().all())
 
     elif account.account_type == "student":
         result = await db.execute(
@@ -41,8 +41,7 @@ async def get_calendar_events(
                 Session.status.in_(["active", "draft"]),
             )
         )
-        for session in result.scalars().all():
-            events.append(_session_to_event(session, "student"))
+        sessions = list(result.scalars().all())
 
     elif account.account_type == "parent":
         from app.models.parent import ParentStudentLink
@@ -67,13 +66,31 @@ async def get_calendar_events(
                     Session.status.in_(["active", "draft"]),
                 )
             )
-            for session in result.scalars().all():
-                events.append(_session_to_event(session, "parent"))
+            sessions = list(result.scalars().all())
+
+    tutor_ids = {s.tutor_id for s in sessions}
+    tutor_map: dict[uuid.UUID, Account] = {}
+    if tutor_ids:
+        acct_result = await db.execute(
+            select(Account).where(Account.id.in_(tutor_ids))
+        )
+        for acct in acct_result.scalars().all():
+            tutor_map[acct.id] = acct
+
+    role = "tutor" if account.account_type == "tutor" else account.account_type
+    for session in sessions:
+        tutor = tutor_map.get(session.tutor_id)
+        tutor_name = (
+            f"{tutor.first_name} {tutor.last_name}" if tutor else None
+        )
+        events.append(_session_to_event(session, role, tutor_name))
 
     return events
 
 
-def _session_to_event(session: Session, role: str) -> dict:
+def _session_to_event(
+    session: Session, role: str, tutor_name: str | None = None
+) -> dict:
     return {
         "id": str(session.id),
         "title": session.title,
@@ -84,4 +101,6 @@ def _session_to_event(session: Session, role: str) -> dict:
         "status": session.status,
         "role": role,
         "location_city": session.location_city,
+        "jitsi_room_name": session.jitsi_room_name,
+        "tutor_name": tutor_name,
     }

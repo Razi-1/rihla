@@ -9,6 +9,7 @@ export interface CalendarEvent {
   tutor_name?: string;
   is_own?: boolean;
   color?: string;
+  jitsi_room_name?: string;
 }
 
 export interface CalendarFilters {

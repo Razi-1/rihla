@@ -15,14 +15,26 @@ export interface Review {
 export interface ReviewCreateRequest {
   tutor_id: string;
   rating: number;
-  comment: string;
-  duration_months?: number;
+  text: string;
+  sessions_attended?: number;
+  approximate_duration_weeks: number;
 }
 
 export interface ReviewUpdateRequest {
   rating?: number;
-  comment?: string;
-  duration_months?: number;
+  text?: string;
+}
+
+export interface StudentReview {
+  id: string;
+  tutor_id: string;
+  tutor_name: string;
+  tutor_profile_picture: string | null;
+  rating: number;
+  comment: string;
+  duration_months: number | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface RatingDistribution {

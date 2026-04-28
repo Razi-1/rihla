@@ -1,10 +1,14 @@
+import asyncio
+import io
 import logging
 import uuid
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
+from functools import partial
 
 from minio import Minio
 
 from app.config import settings
+from app.core.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -43,25 +47,28 @@ async def upload_file(
     content_type: str,
 ) -> str:
     if content_type not in ALLOWED_MIME_TYPES:
-        raise ValueError(f"File type {content_type} not allowed")
+        raise ValidationError(detail=f"File type {content_type} not allowed")
 
     max_size = settings.MAX_UPLOAD_SIZE_MB * 1024 * 1024
     if len(data) > max_size:
-        raise ValueError(f"File exceeds {settings.MAX_UPLOAD_SIZE_MB}MB limit")
+        raise ValidationError(detail=f"File exceeds {settings.MAX_UPLOAD_SIZE_MB}MB limit")
 
     client = get_minio_client()
-    import io
-    from datetime import datetime, timezone
 
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
     object_name = f"{entity_id}/{timestamp}_{filename}"
 
-    client.put_object(
-        bucket,
-        object_name,
-        io.BytesIO(data),
-        length=len(data),
-        content_type=content_type,
+    loop = asyncio.get_event_loop()
+    await loop.run_in_executor(
+        None,
+        partial(
+            client.put_object,
+            bucket,
+            object_name,
+            io.BytesIO(data),
+            length=len(data),
+            content_type=content_type,
+        ),
     )
 
     return f"{bucket}/{object_name}"
@@ -69,7 +76,9 @@ async def upload_file(
 
 async def get_presigned_url(bucket: str, object_name: str) -> str:
     client = get_minio_client()
-    url = client.presigned_get_object(
-        bucket, object_name, expires=timedelta(hours=1)
+    loop = asyncio.get_event_loop()
+    url = await loop.run_in_executor(
+        None,
+        partial(client.presigned_get_object, bucket, object_name, expires=timedelta(hours=1)),
     )
     return url

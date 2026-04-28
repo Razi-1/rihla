@@ -177,6 +177,59 @@ async def structured_search(
 
         tutors.append(tutor_data)
 
+    ml_vectors_query = select(
+        TutorMLVectors.tutor_id,
+        TutorMLVectors.reliability_score,
+        TutorMLVectors.cancellation_rate_48h,
+        TutorMLVectors.total_sessions_completed,
+    ).where(TutorMLVectors.tutor_id.in_(tutor_ids))
+    ml_result = await db.execute(ml_vectors_query)
+    ml_map = {
+        row[0]: {
+            "reliability_score": row[1],
+            "cancellation_rate": row[2],
+            "sessions_completed": row[3],
+        }
+        for row in ml_result.all()
+    }
+
+    from app.ml.ranking import score_tutor, confidence_weight
+
+    for t in tutors:
+        tid = uuid.UUID(t["id"])
+        avg_r = t.get("average_rating") or 0
+        r_count = t.get("review_count") or 0
+        ml_data = ml_map.get(tid, {})
+        reliability = float(ml_data.get("reliability_score") or 0.5)
+        cancellation = float(ml_data.get("cancellation_rate") or 0.0)
+        sessions = int(ml_data.get("sessions_completed") or 0)
+
+        sent_score = 0.5
+        sent_row = sentiment_map.get(tid)
+        if sent_row:
+            sent_q = await db.execute(
+                select(TutorSentiment.sentiment_score).where(TutorSentiment.tutor_id == tid)
+            )
+            s_val = sent_q.scalar_one_or_none()
+            if s_val is not None:
+                sent_score = float(s_val)
+
+        features = {
+            "reliability_score": reliability,
+            "sentiment_score": sent_score,
+            "review_count": r_count,
+            "sessions_completed": sessions,
+            "average_rating": avg_r,
+            "cancellation_rate": cancellation,
+        }
+        raw_score = score_tutor(features)
+        rank_score = confidence_weight(raw_score, r_count, 15)
+        t["_rank_score"] = rank_score
+
+    tutors.sort(key=lambda t: t["_rank_score"], reverse=True)
+    for t in tutors:
+        del t["_rank_score"]
+
     next_cursor = None
     if has_more and tutors:
         next_cursor = tutors[-1]["id"]
@@ -194,10 +247,149 @@ async def extract_filters_from_query(
     limit: int = 20,
     cursor: str | None = None,
 ) -> SearchFilters:
-    """Extract structured search filters from a natural language query."""
-    q = query.lower()
+    """Extract structured search filters from a natural language query.
+
+    Tries Ollama NLP extraction first, falls back to regex.
+    """
     filters = SearchFilters(limit=limit, cursor=cursor)
 
+    subjects_result = await db.execute(select(Subject.id, Subject.name))
+    all_subjects = subjects_result.all()
+    subject_name_to_id = {name.lower(): sid for sid, name in all_subjects}
+
+    try:
+        from app.ml.nlp_extractor import extract_from_query
+        extracted = await extract_from_query(query)
+        if extracted and not extracted.get("raw_query"):
+            logger.info("Ollama NLP extracted: %s", extracted)
+            await _apply_nlp_params(db, filters, extracted, subject_name_to_id)
+            if _has_any_filter(filters):
+                return filters
+            logger.info("NLP extraction produced no usable filters, falling back to regex")
+    except Exception as e:
+        logger.warning("Ollama NLP extraction failed, using regex fallback: %s", e)
+
+    await _apply_regex_extraction(db, filters, query.lower(), all_subjects, subject_name_to_id)
+    return filters
+
+
+async def _resolve_location(
+    db: AsyncSession,
+    location_raw: str,
+) -> tuple[uuid.UUID | None, uuid.UUID | None, uuid.UUID | None]:
+    if not location_raw:
+        return None, None, None
+    loc_lower = location_raw.lower().strip()
+
+    city_result = await db.execute(
+        select(City).where(func.lower(City.name) == loc_lower)
+    )
+    city = city_result.scalar_one_or_none()
+    if city:
+        return None, None, city.id
+
+    region_result = await db.execute(
+        select(Region).where(func.lower(Region.name) == loc_lower)
+    )
+    region = region_result.scalar_one_or_none()
+    if region:
+        return None, region.id, None
+
+    country_result = await db.execute(
+        select(Country).where(
+            or_(func.lower(Country.name) == loc_lower, func.lower(Country.code) == loc_lower)
+        )
+    )
+    country = country_result.scalar_one_or_none()
+    if country:
+        return country.id, None, None
+
+    city_like = await db.execute(
+        select(City).where(func.lower(City.name).contains(loc_lower)).limit(1)
+    )
+    city_match = city_like.scalar_one_or_none()
+    if city_match:
+        return None, None, city_match.id
+
+    region_like = await db.execute(
+        select(Region).where(func.lower(Region.name).contains(loc_lower)).limit(1)
+    )
+    region_match = region_like.scalar_one_or_none()
+    if region_match:
+        return None, region_match.id, None
+
+    return None, None, None
+
+
+async def _apply_nlp_params(
+    db: AsyncSession,
+    filters: SearchFilters,
+    params: dict,
+    subject_map: dict[str, uuid.UUID],
+) -> None:
+    subject_raw = params.get("subject", "")
+    if subject_raw:
+        subj_lower = subject_raw.lower().strip()
+        if subj_lower in subject_map:
+            filters.subject_id = subject_map[subj_lower]
+        else:
+            ALIASES = {
+                "math": "mathematics", "maths": "mathematics",
+                "bio": "biology", "cs": "computer science",
+                "ict": "ict", "coding": "computer science",
+                "programming": "computer science", "econ": "economics",
+            }
+            canonical = ALIASES.get(subj_lower, subj_lower)
+            if canonical in subject_map:
+                filters.subject_id = subject_map[canonical]
+
+    mode_raw = (params.get("mode") or "").lower().strip()
+    MODE_MAP = {
+        "online": "online", "remote": "online", "virtual": "online",
+        "in-person": "physical", "in person": "physical",
+        "physical": "physical", "face to face": "physical",
+        "hybrid": "hybrid",
+    }
+    if mode_raw in MODE_MAP:
+        filters.mode = MODE_MAP[mode_raw]
+
+    gender_raw = (params.get("gender_preference") or "").lower().strip()
+    if gender_raw in ("female", "male"):
+        filters.gender = gender_raw
+
+    budget_raw = params.get("budget")
+    if budget_raw:
+        budget_str = str(budget_raw).replace(",", "")
+        nums = re.findall(r"\d+", budget_str)
+        if nums:
+            filters.max_rate = Decimal(nums[0])
+
+    location_raw = params.get("location", "")
+    if location_raw:
+        country_id, region_id, city_id = await _resolve_location(db, location_raw)
+        if city_id:
+            filters.city_id = city_id
+        elif region_id:
+            filters.region_id = region_id
+        elif country_id:
+            filters.country_id = country_id
+
+
+def _has_any_filter(filters: SearchFilters) -> bool:
+    return any([
+        filters.subject_id, filters.mode, filters.gender,
+        filters.min_rate, filters.max_rate,
+        filters.city_id, filters.region_id, filters.country_id,
+    ])
+
+
+async def _apply_regex_extraction(
+    db: AsyncSession,
+    filters: SearchFilters,
+    q: str,
+    all_subjects: list,
+    subject_map: dict[str, uuid.UUID],
+) -> None:
     if any(w in q for w in ["online", "remote", "virtual", "zoom"]):
         filters.mode = "online"
     elif any(w in q for w in ["in-person", "in person", "physical", "face to face", "home"]):
@@ -221,41 +413,50 @@ async def extract_filters_from_query(
     if min_match:
         filters.min_rate = Decimal(min_match.group(1).replace(",", ""))
 
-    subjects_result = await db.execute(select(Subject.id, Subject.name))
-    all_subjects = subjects_result.all()
     for subj_id, subj_name in all_subjects:
         if subj_name.lower() in q:
             filters.subject_id = subj_id
             break
     if not filters.subject_id:
         aliases = {
-            "math": "Mathematics", "maths": "Mathematics",
-            "physics": "Physics", "chemistry": "Chemistry",
-            "bio": "Biology", "english": "English",
-            "cs": "Computer Science", "ict": "ICT",
-            "it": "ICT", "coding": "Computer Science",
-            "programming": "Computer Science", "econ": "Economics",
-            "art": "Art", "history": "History",
-            "science": "Science", "sinhala": "Sinhala",
-            "tamil": "Tamil",
+            "math": "mathematics", "maths": "mathematics",
+            "physics": "physics", "chemistry": "chemistry",
+            "bio": "biology", "english": "english",
+            "cs": "computer science", "ict": "ict",
+            "it": "ict", "coding": "computer science",
+            "programming": "computer science", "econ": "economics",
+            "art": "art", "history": "history",
+            "science": "science", "sinhala": "sinhala",
+            "tamil": "tamil",
         }
         for alias, canonical in aliases.items():
             if alias in q.split():
-                for subj_id, subj_name in all_subjects:
-                    if subj_name.lower() == canonical.lower():
-                        filters.subject_id = subj_id
-                        break
-                if filters.subject_id:
+                if canonical in subject_map:
+                    filters.subject_id = subject_map[canonical]
                     break
 
-    return filters
+    if not filters.city_id and not filters.region_id and not filters.country_id:
+        location_keywords = re.findall(r"(?:in|from|near|around|at)\s+([a-zA-Z]+(?:\s+[a-zA-Z]+)?)", q)
+        skip_words = {"person", "class", "online", "a", "the", "an", "sri", "lanka"}
+        for loc_phrase in location_keywords:
+            loc_clean = loc_phrase.strip()
+            if loc_clean.lower() in skip_words:
+                continue
+            if loc_clean.lower() == "sri lanka" or loc_clean.lower() == "sri":
+                continue
+            country_id, region_id, city_id = await _resolve_location(db, loc_clean)
+            if city_id or region_id or country_id:
+                filters.city_id = city_id
+                filters.region_id = region_id
+                filters.country_id = country_id
+                break
 
 
 def describe_extracted_filters(filters: SearchFilters) -> str:
     """Produce a human-readable description of extracted filters."""
     parts: list[str] = []
     if filters.subject_id:
-        parts.append(f"subject filter applied")
+        parts.append("subject filter applied")
     if filters.mode:
         parts.append(f"mode: {filters.mode}")
     if filters.gender:
@@ -264,6 +465,12 @@ def describe_extracted_filters(filters: SearchFilters) -> str:
         parts.append(f"max rate: {filters.max_rate}")
     if filters.min_rate:
         parts.append(f"min rate: {filters.min_rate}")
+    if filters.city_id:
+        parts.append("city filter applied")
+    if filters.region_id:
+        parts.append("region filter applied")
+    if filters.country_id:
+        parts.append("country filter applied")
     if not parts:
-        return "Showing all available tutors"
-    return "Filtered by " + ", ".join(parts)
+        return "Showing all available tutors (ranked by quality)"
+    return "Filtered by " + ", ".join(parts) + " (ranked by relevance)"

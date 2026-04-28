@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import { ArrowLeft, Star, Trash2 } from 'lucide-react';
 import { useApi } from '@/hooks/useApi';
 import { usePageTitle } from '@/hooks/usePageTitle';
-import { getReviews, deleteReview } from '@/services/reviewService';
+import { getReview, deleteReview } from '@/services/reviewService';
 import { AdminHeader } from '@/components/layout/AdminHeader';
 import { Button } from '@/components/common/Button';
 import { Badge } from '@/components/common/Badge';
@@ -19,8 +19,13 @@ export default function ReviewDetailPage() {
   const [actionLoading, setActionLoading] = useState(false);
 
   const fetcher = useCallback(async () => {
-    const reviews = await getReviews({ limit: 100 });
-    return reviews.find((r) => r.id === id) ?? null;
+    if (!id) return null;
+    try {
+      return await getReview(id);
+    } catch (err) {
+      console.error('[ReviewDetail] Failed to load review:', err);
+      return null;
+    }
   }, [id]);
 
   const { data: review, loading, refetch } = useApi(fetcher, [id]);

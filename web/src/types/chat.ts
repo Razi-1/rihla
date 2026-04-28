@@ -13,6 +13,7 @@ export interface ChatMember {
   account_id: string;
   display_name: string;
   avatar_url: string | null;
+  account_type?: string;
 }
 
 export interface ChatMessage {

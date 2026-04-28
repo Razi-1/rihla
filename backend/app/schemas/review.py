@@ -8,7 +8,7 @@ class ReviewCreateRequest(BaseModel):
     tutor_id: uuid.UUID
     rating: int = Field(ge=1, le=5)
     text: str = Field(min_length=10, max_length=5000)
-    sessions_attended: int = Field(ge=1)
+    sessions_attended: int | None = Field(None, ge=1)
     approximate_duration_weeks: int = Field(ge=1)
 
 

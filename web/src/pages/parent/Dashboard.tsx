@@ -19,7 +19,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    parentService.getDashboard().then((res) => setData(res.data.data)).catch(() => {}).finally(() => setLoading(false));
+    parentService.getDashboard().then((res) => setData(res.data.data)).catch((err) => console.error('[ParentDashboard] Failed to load:', err)).finally(() => setLoading(false));
   }, []);
 
   if (loading) return <PageTransition><div className={styles.page}><div className={styles.statsGrid}>{[1, 2, 3].map((i) => <Skeleton key={i} width="100%" height={90} borderRadius="var(--radius-md)" />)}</div></div></PageTransition>;
@@ -53,16 +53,13 @@ export default function Dashboard() {
           ) : (
             <motion.div className={cardStyles.grid} variants={staggerContainer} initial="initial" animate="animate">
               {data?.children.map((child) => (
-                <motion.div key={child.id} variants={staggerItem}>
-                  <Link to={`/parent/children/${child.id}`} className={cardStyles.card}>
+                <motion.div key={child.student_id} variants={staggerItem}>
+                  <Link to={`/parent/children/${child.student_id}`} className={cardStyles.card}>
                     <Avatar src={child.profile_picture_url} firstName={child.first_name} lastName={child.last_name} size="lg" />
                     <div className={cardStyles.info}>
                       <h3>{child.first_name} {child.last_name}</h3>
-                      <p>{child.email}</p>
                       <div className={cardStyles.stats}>
-                        <Badge variant={child.status === 'active' ? 'success' : 'warning'}>{child.status}</Badge>
-                        <span>{child.active_classes} classes</span>
-                        <span>{child.upcoming_sessions} upcoming</span>
+                        <Badge variant={child.link_status === 'active' ? 'success' : 'warning'}>{child.link_status}</Badge>
                       </div>
                     </div>
                   </Link>

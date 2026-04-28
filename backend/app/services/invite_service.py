@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.core.exceptions import ConflictError, ForbiddenError, NotFoundError, ValidationError
 from app.models.enrolment import Enrolment
@@ -51,6 +52,7 @@ async def get_student_invites(
 ) -> list[SessionInvite]:
     result = await db.execute(
         select(SessionInvite)
+        .options(selectinload(SessionInvite.session))
         .where(
             SessionInvite.student_id == student_id,
             SessionInvite.status == "pending",
@@ -64,7 +66,9 @@ async def get_invite(
     db: AsyncSession, invite_id: uuid.UUID
 ) -> SessionInvite:
     result = await db.execute(
-        select(SessionInvite).where(SessionInvite.id == invite_id)
+        select(SessionInvite)
+        .options(selectinload(SessionInvite.session))
+        .where(SessionInvite.id == invite_id)
     )
     invite = result.scalar_one_or_none()
     if not invite:

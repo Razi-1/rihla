@@ -4,7 +4,6 @@ import { Bell, Check } from 'lucide-react';
 import PageTransition from '@/components/common/PageTransition';
 import Button from '@/components/common/Button';
 import EmptyState from '@/components/common/EmptyState';
-import LoadMoreButton from '@/components/common/LoadMoreButton';
 import { useNotificationStore } from '@/store/notificationStore';
 import { notificationService } from '@/services/notificationService';
 import { formatRelative } from '@/utils/formatters';
@@ -14,33 +13,33 @@ import styles from './Notifications.module.css';
 export default function Notifications() {
   const { notifications, setNotifications, markRead, markAllRead } = useNotificationStore();
   const [loading, setLoading] = useState(true);
-  const [hasMore, setHasMore] = useState(false);
-  const [cursor, setCursor] = useState<string | undefined>();
 
   useEffect(() => {
-    notificationService.list().then((res) => {
-      setNotifications(res.data.data);
-      setHasMore(res.data.has_more);
-      setCursor(res.data.next_cursor ?? undefined);
-    }).finally(() => setLoading(false));
+    notificationService.list()
+      .then((res) => {
+        const data = Array.isArray(res.data) ? res.data : res.data.data ?? [];
+        setNotifications(data);
+      })
+      .catch((err) => console.error('[Notifications] Failed to load:', err))
+      .finally(() => setLoading(false));
   }, [setNotifications]);
 
-  const loadMore = async () => {
-    if (!cursor) return;
-    const res = await notificationService.list(cursor);
-    setNotifications([...notifications, ...res.data.data]);
-    setHasMore(res.data.has_more);
-    setCursor(res.data.next_cursor ?? undefined);
-  };
-
   const handleMarkAll = async () => {
-    await notificationService.markAllRead();
-    markAllRead();
+    try {
+      await notificationService.markAllRead();
+      markAllRead();
+    } catch (err) {
+      console.error('[Notifications] Failed to mark all read:', err);
+    }
   };
 
   const handleMarkRead = async (id: string) => {
-    await notificationService.markRead(id);
-    markRead(id);
+    try {
+      await notificationService.markRead(id);
+      markRead(id);
+    } catch (err) {
+      console.error('[Notifications] Failed to mark read:', err);
+    }
   };
 
   if (loading) return <PageTransition><div /></PageTransition>;
@@ -74,7 +73,6 @@ export default function Notifications() {
             ))}
           </motion.div>
         )}
-        <LoadMoreButton onClick={loadMore} hasMore={hasMore} />
       </div>
     </PageTransition>
   );

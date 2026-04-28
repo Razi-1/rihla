@@ -1,6 +1,6 @@
 import api from '@/lib/axios';
 import type { ApiResponse, PaginatedResponse, SuccessResponse } from '@/types/common';
-import type { Review, ReviewCreateRequest, ReviewUpdateRequest } from '@/types/review';
+import type { Review, ReviewCreateRequest, ReviewUpdateRequest, StudentReview } from '@/types/review';
 
 export const reviewService = {
   create: (data: ReviewCreateRequest) =>
@@ -12,10 +12,13 @@ export const reviewService = {
     }),
 
   getMine: (tutorId: string) =>
-    api.get<ApiResponse<Review>>(`/reviews/mine/${tutorId}`),
+    api.get<ApiResponse<Review | null>>(`/reviews/me/${tutorId}`),
+
+  getMyReviews: () =>
+    api.get<{ data: StudentReview[] }>('/reviews/me'),
 
   update: (id: string, data: ReviewUpdateRequest) =>
-    api.put<ApiResponse<Review>>(`/reviews/${id}`, data),
+    api.put<SuccessResponse>(`/reviews/${id}`, data),
 
   delete: (id: string) =>
     api.delete<SuccessResponse>(`/reviews/${id}`),

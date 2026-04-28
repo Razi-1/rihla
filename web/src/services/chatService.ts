@@ -1,6 +1,6 @@
 import api from '@/lib/axios';
 import type { ApiResponse } from '@/types/common';
-import type { ChatRoom, ChatContact, AIAssistantMessage } from '@/types/chat';
+import type { ChatRoom, ChatContact, ChatMessage, AIAssistantMessage } from '@/types/chat';
 
 export const chatService = {
   createDM: (targetAccountId: string) =>
@@ -17,4 +17,10 @@ export const chatService = {
 
   sendAIMessage: (message: string, history: AIAssistantMessage[]) =>
     api.post<ApiResponse<{ response: string }>>('/ai/assistant/message', { message, history }),
+
+  getMessages: (roomId: string) =>
+    api.get<ApiResponse<ChatMessage[]>>(`/chat/rooms/${roomId}/messages`),
+
+  sendMessage: (roomId: string, body: string) =>
+    api.post<ApiResponse<ChatMessage>>(`/chat/rooms/${roomId}/messages`, { body }),
 };

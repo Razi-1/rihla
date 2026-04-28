@@ -14,12 +14,22 @@ export interface StudentProfileUpdate {
   subjects?: { subject_id: string; education_level_id: string }[];
 }
 
+export interface ActiveClassSummary {
+  id: string;
+  title: string;
+  tutor_name: string;
+  session_type: string;
+  start_time: string;
+  mode: string;
+}
+
 export interface StudentDashboard {
   upcoming_sessions: number;
   active_classes: number;
   pending_invites: number;
   next_session: { id: string; title: string; start_time: string; tutor_name: string } | null;
   recent_invites: StudentInviteSummary[];
+  active_classes_list: ActiveClassSummary[];
 }
 
 export interface StudentInviteSummary {

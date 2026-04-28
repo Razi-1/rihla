@@ -55,6 +55,8 @@ async def create_session(
         individual_rate_override=data.individual_rate_override,
         group_rate_override=data.group_rate_override,
         currency_override=data.currency_override,
+        subject_id=data.subject_id,
+        education_level_id=data.education_level_id,
     )
     db.add(session)
     await db.flush()

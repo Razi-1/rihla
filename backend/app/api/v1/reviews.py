@@ -30,6 +30,15 @@ async def create_review(
     )
 
 
+@router.get("/me")
+async def get_my_reviews(
+    current_user: Account = Depends(require_role("student")),
+    db: AsyncSession = Depends(get_db),
+):
+    reviews = await review_service.get_student_reviews(db, current_user.id)
+    return {"data": reviews}
+
+
 @router.get("/tutor/{tutor_id}")
 async def get_tutor_reviews(
     tutor_id: uuid.UUID,
@@ -39,6 +48,39 @@ async def get_tutor_reviews(
 ):
     reviews = await review_service.get_tutor_reviews(db, tutor_id, cursor, limit)
     return {"data": reviews}
+
+
+@router.get("/me/{tutor_id}")
+async def get_my_review(
+    tutor_id: uuid.UUID,
+    current_user: Account = Depends(require_role("student")),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.models.review import Review, ReviewAuthorship
+    from sqlalchemy import select
+
+    result = await db.execute(
+        select(Review)
+        .join(ReviewAuthorship, ReviewAuthorship.review_id == Review.id)
+        .where(
+            ReviewAuthorship.student_id == current_user.id,
+            ReviewAuthorship.tutor_id == tutor_id,
+            Review.is_deleted == False,
+        )
+    )
+    review = result.scalar_one_or_none()
+    if not review:
+        return {"data": None}
+    return {
+        "data": {
+            "id": str(review.id),
+            "tutor_id": str(review.tutor_id),
+            "rating": review.rating,
+            "text": review.text,
+            "created_at": review.created_at.isoformat() if review.created_at else None,
+            "updated_at": review.updated_at.isoformat() if review.updated_at else None,
+        }
+    }
 
 
 @router.put("/{review_id}", response_model=SuccessResponse)

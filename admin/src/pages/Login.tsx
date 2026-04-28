@@ -51,7 +51,8 @@ export default function LoginPage() {
         res.access_token,
       );
       navigate('/', { replace: true });
-    } catch {
+    } catch (err) {
+      console.error('[AdminLogin] Login failed:', err);
       setError('Invalid email or password');
     } finally {
       setLoading(false);
@@ -94,7 +95,7 @@ export default function LoginPage() {
 
           {error && <p className={styles.error}>{error}</p>}
 
-          <Button type="submit" variant="danger" loading={loading}>
+          <Button type="submit" variant="primary" loading={loading}>
             Sign In
           </Button>
         </form>

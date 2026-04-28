@@ -40,6 +40,9 @@ async def get_dashboard_stats(db: AsyncSession) -> dict:
             Account.is_restricted == True, Account.is_active == True
         )
     )
+    pending_reviews = await db.execute(
+        select(func.count()).select_from(Review).where(Review.is_deleted == False)
+    )
 
     audit_result = await db.execute(
         select(AdminAuditLog)
@@ -53,6 +56,7 @@ async def get_dashboard_stats(db: AsyncSession) -> dict:
         "total_parents": parents.scalar(),
         "total_sessions": sessions.scalar(),
         "restricted_accounts": restricted.scalar(),
+        "pending_reviews": pending_reviews.scalar(),
         "recent_audit_entries": [
             {
                 "id": str(entry.id),
@@ -193,8 +197,11 @@ async def get_audit_log(
     cursor: str | None = None,
     limit: int = 50,
     action_type: str | None = None,
-) -> list[AdminAuditLog]:
-    query = select(AdminAuditLog)
+) -> list[dict]:
+    query = (
+        select(AdminAuditLog, Account)
+        .outerjoin(Account, AdminAuditLog.admin_id == Account.id)
+    )
 
     if action_type:
         query = query.where(AdminAuditLog.action_type == action_type)
@@ -205,4 +212,20 @@ async def get_audit_log(
 
     query = query.order_by(AdminAuditLog.created_at.desc()).limit(limit)
     result = await db.execute(query)
-    return list(result.scalars().all())
+    rows = result.all()
+
+    entries = []
+    for entry, admin_account in rows:
+        data = {
+            "id": entry.id,
+            "admin_id": entry.admin_id,
+            "admin_name": f"{admin_account.first_name} {admin_account.last_name}" if admin_account else None,
+            "action_type": entry.action_type,
+            "target_entity_id": entry.target_entity_id,
+            "target_entity_type": entry.target_entity_type,
+            "reason": entry.reason,
+            "outcome": getattr(entry, "outcome", "success"),
+            "created_at": entry.created_at,
+        }
+        entries.append(data)
+    return entries

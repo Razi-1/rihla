@@ -1,5 +1,8 @@
+import asyncio
+import logging
 from contextlib import asynccontextmanager
 
+import httpx
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -16,11 +19,33 @@ from app.core.logging_config import setup_logging
 from app.core.rate_limiter import close_redis
 from app.tasks.scheduler import scheduler, setup_scheduler
 
+logger = logging.getLogger(__name__)
+
+
+async def _warmup_ollama() -> None:
+    """Pre-load the Ollama model so the first user request doesn't wait for a cold start."""
+    url = f"{settings.OLLAMA_BASE_URL}/api/chat"
+    try:
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            await client.post(
+                url,
+                json={
+                    "model": settings.OLLAMA_MODEL,
+                    "messages": [{"role": "user", "content": "hi"}],
+                    "stream": False,
+                    "keep_alive": -1,
+                },
+            )
+        logger.info("Ollama model %s warmed up", settings.OLLAMA_MODEL)
+    except Exception as e:
+        logger.warning("Ollama warmup failed (non-fatal): %s", e)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     setup_logging()
     setup_scheduler()
+    asyncio.create_task(_warmup_ollama())
     yield
     scheduler.shutdown(wait=False)
     await close_redis()

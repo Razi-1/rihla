@@ -34,28 +34,7 @@ async def get_preview(
 ):
     profile = await tutor_service.get_tutor_profile(db, current_user.id)
     stats = await tutor_service.get_tutor_stats(db, current_user.id)
-    return {
-        "data": {
-            "account": {
-                "id": str(current_user.id),
-                "first_name": current_user.first_name,
-                "last_name": current_user.last_name,
-                "profile_picture_url": current_user.profile_picture_url,
-            },
-            "bio": profile.bio,
-            "mode_of_tuition": profile.mode_of_tuition,
-            "individual_rate": float(profile.individual_rate) if profile.individual_rate else None,
-            "group_rate": float(profile.group_rate) if profile.group_rate else None,
-            "currency": profile.currency,
-            "is_profile_complete": profile.is_profile_complete,
-            "timezone": profile.timezone,
-            "subjects": [],
-            "working_hours": [],
-            "average_rating": stats["average_rating"],
-            "review_count": stats["review_count"],
-            "sentiment_summary": stats.get("sentiment_summary"),
-        }
-    }
+    return {"data": tutor_service.serialize_tutor_profile(profile, stats)}
 
 
 @router.get("/me/profile", response_model=TutorProfileResponse)
@@ -128,6 +107,48 @@ async def update_working_hours(
     return {"message": "Working hours updated"}
 
 
+@router.get("/me/classes")
+async def get_my_classes(
+    current_user: Account = Depends(require_role("tutor")),
+    db: AsyncSession = Depends(get_db),
+):
+    from sqlalchemy import select
+    from sqlalchemy.orm import selectinload
+    from app.models.session import Session
+
+    result = await db.execute(
+        select(Session)
+        .options(selectinload(Session.enrolments))
+        .where(Session.tutor_id == current_user.id)
+        .order_by(Session.start_time.desc())
+    )
+    sessions = result.scalars().all()
+    return {
+        "data": [
+            {
+                "id": str(s.id),
+                "tutor_id": str(s.tutor_id),
+                "tutor_name": f"{current_user.first_name} {current_user.last_name}",
+                "title": s.title,
+                "session_type": s.session_type,
+                "mode": s.mode,
+                "status": s.status,
+                "start_time": s.start_time.isoformat(),
+                "end_time": s.end_time.isoformat(),
+                "duration_minutes": s.duration_minutes,
+                "max_group_size": s.max_group_size,
+                "jitsi_room_name": s.jitsi_room_name,
+                "enrolled_count": len(s.enrolments) if s.enrolments else 0,
+                "subject_name": s.subject.name if s.subject else None,
+                "education_level_name": s.education_level.name if s.education_level else None,
+            }
+            for s in sessions
+        ],
+        "next_cursor": None,
+        "has_more": False,
+    }
+
+
 @router.get("/{tutor_id}")
 async def get_public_profile(
     tutor_id: uuid.UUID,
@@ -135,17 +156,7 @@ async def get_public_profile(
 ):
     profile = await tutor_service.get_tutor_profile(db, tutor_id)
     stats = await tutor_service.get_tutor_stats(db, tutor_id)
-    return {
-        "data": {
-            "account_id": str(tutor_id),
-            "bio": profile.bio,
-            "mode_of_tuition": profile.mode_of_tuition,
-            "is_profile_complete": profile.is_profile_complete,
-            "average_rating": stats["average_rating"],
-            "review_count": stats["review_count"],
-            "sentiment_summary": stats["sentiment_summary"],
-        }
-    }
+    return {"data": tutor_service.serialize_tutor_profile(profile, stats)}
 
 
 @router.get("/{tutor_id}/authenticated")
@@ -156,16 +167,47 @@ async def get_auth_profile(
 ):
     profile = await tutor_service.get_tutor_profile(db, tutor_id)
     stats = await tutor_service.get_tutor_stats(db, tutor_id)
+    return {"data": tutor_service.serialize_tutor_profile(profile, stats)}
+
+
+@router.get("/{tutor_id}/classes")
+async def get_tutor_classes(
+    tutor_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+):
+    from sqlalchemy import select
+    from sqlalchemy.orm import selectinload
+    from app.models.session import Session
+
+    result = await db.execute(
+        select(Session)
+        .options(selectinload(Session.enrolments))
+        .where(
+            Session.tutor_id == tutor_id,
+            Session.session_type == "group_class",
+            Session.status == "active",
+        ).order_by(Session.start_time.asc())
+    )
+    sessions = result.scalars().all()
     return {
-        "data": {
-            "account_id": str(tutor_id),
-            "bio": profile.bio,
-            "mode_of_tuition": profile.mode_of_tuition,
-            "individual_rate": str(profile.individual_rate) if profile.individual_rate else None,
-            "group_rate": str(profile.group_rate) if profile.group_rate else None,
-            "currency": profile.currency,
-            "average_rating": stats["average_rating"],
-            "review_count": stats["review_count"],
-            "sentiment_summary": stats["sentiment_summary"],
-        }
+        "data": [
+            {
+                "id": str(s.id),
+                "tutor_id": str(s.tutor_id),
+                "title": s.title,
+                "session_type": s.session_type,
+                "mode": s.mode,
+                "status": s.status,
+                "location_city": s.location_city,
+                "duration_minutes": s.duration_minutes,
+                "start_time": s.start_time.isoformat(),
+                "end_time": s.end_time.isoformat(),
+                "max_group_size": s.max_group_size,
+                "jitsi_room_name": s.jitsi_room_name,
+                "enrolled_count": len(s.enrolments) if s.enrolments else 0,
+                "subject_name": s.subject.name if s.subject else None,
+                "education_level_name": s.education_level.name if s.education_level else None,
+            }
+            for s in sessions
+        ]
     }

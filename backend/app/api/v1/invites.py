@@ -13,13 +13,25 @@ from app.services import invite_service
 router = APIRouter()
 
 
+def _enrich_invite(inv: "SessionInvite") -> InviteResponse:
+    resp = InviteResponse.model_validate(inv)
+    session = getattr(inv, "session", None)
+    if session:
+        resp.session_title = session.title
+        resp.session_type = session.session_type
+        resp.session_mode = getattr(session, "mode", None)
+        resp.start_time = session.start_time
+        resp.duration_minutes = getattr(session, "duration_minutes", None)
+    return resp
+
+
 @router.get("", response_model=list[InviteResponse])
 async def list_invites(
     current_user: Account = Depends(require_role("student")),
     db: AsyncSession = Depends(get_db),
 ):
     invites = await invite_service.get_student_invites(db, current_user.id)
-    return [InviteResponse.model_validate(inv) for inv in invites]
+    return [_enrich_invite(inv) for inv in invites]
 
 
 @router.get("/{invite_id}", response_model=InviteResponse)
@@ -29,7 +41,7 @@ async def get_invite(
     db: AsyncSession = Depends(get_db),
 ):
     invite = await invite_service.get_invite(db, invite_id)
-    return InviteResponse.model_validate(invite)
+    return _enrich_invite(invite)
 
 
 @router.post("/{invite_id}/accept", response_model=SuccessResponse)

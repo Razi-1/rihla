@@ -188,6 +188,8 @@ services:
       - "8443:443"
     volumes:
       - jitsi_web:/config
+      - ./mkcert/localhost+2.pem:/config/keys/cert.crt:ro
+      - ./mkcert/localhost+2-key.pem:/config/keys/cert.key:ro
     restart: unless-stopped
 
 volumes:

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import PageTransition from '@/components/common/PageTransition';
@@ -7,7 +7,9 @@ import Select from '@/components/common/Select';
 import TextArea from '@/components/common/TextArea';
 import Button from '@/components/common/Button';
 import { sessionService } from '@/services/sessionService';
+import { tutorService } from '@/services/tutorService';
 import type { SessionCreateRequest } from '@/types/session';
+import type { SubjectLevel } from '@/types/common';
 import styles from './CreateClass.module.css';
 
 const defaultValues = {
@@ -18,19 +20,43 @@ const defaultValues = {
   start_time: '',
   max_group_size: '',
   location_address: '',
+  tutor_subject: '',
 };
 
 export default function CreateClass() {
   const navigate = useNavigate();
   const [error, setError] = useState('');
+  const [tutorSubjects, setTutorSubjects] = useState<SubjectLevel[]>([]);
 
   const { register, handleSubmit, formState: { isSubmitting } } = useForm({
     defaultValues,
   });
 
+  useEffect(() => {
+    tutorService.getPreview().then((res) => {
+      setTutorSubjects(res.data.data.subjects ?? []);
+    }).catch(() => {});
+  }, []);
+
+  const subjectOptions = useMemo(
+    () => tutorSubjects.map((ts) => ({
+      value: `${ts.subject_id}|${ts.education_level_id}`,
+      label: `${ts.subject_name} — ${ts.education_level_name}`,
+    })),
+    [tutorSubjects],
+  );
+
   const onSubmit = async (data: typeof defaultValues) => {
     setError('');
     try {
+      let subject_id: string | undefined;
+      let education_level_id: string | undefined;
+      if (data.tutor_subject) {
+        const [sid, lid] = data.tutor_subject.split('|');
+        subject_id = sid;
+        education_level_id = lid;
+      }
+
       const payload: SessionCreateRequest = {
         title: data.title,
         session_type: data.session_type as SessionCreateRequest['session_type'],
@@ -39,6 +65,8 @@ export default function CreateClass() {
         start_time: new Date(data.start_time).toISOString(),
         max_group_size: data.max_group_size ? parseInt(data.max_group_size) : undefined,
         location_address: data.location_address || undefined,
+        subject_id,
+        education_level_id,
       };
       const res = await sessionService.create(payload);
       navigate(`/tutor/classes/${res.data.data.id}`);
@@ -55,6 +83,20 @@ export default function CreateClass() {
           <h2>Create a New Class</h2>
           <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
             <Input label="Class Title" placeholder="e.g. O-Level Mathematics" {...register('title', { required: true })} />
+
+            {subjectOptions.length > 0 && (
+              <Select
+                label="Subject & Level"
+                placeholder="Select subject and level"
+                options={subjectOptions}
+                {...register('tutor_subject')}
+              />
+            )}
+            {subjectOptions.length === 0 && (
+              <p style={{ fontSize: 'var(--text-body-sm)', color: 'var(--color-text-muted)', background: 'var(--color-surface-low)', padding: 'var(--space-3)', borderRadius: 'var(--radius-sm)' }}>
+                Add subjects to your profile first to tag classes by subject.
+              </p>
+            )}
 
             <div className={styles.row}>
               <Select label="Type" options={[

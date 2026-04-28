@@ -43,6 +43,30 @@ async def list_reviews(
     }
 
 
+@router.get("/{review_id}")
+async def get_review(
+    review_id: uuid.UUID,
+    current_user: Account = Depends(require_role("admin")),
+    db: AsyncSession = Depends(get_db),
+):
+    review = await db.get(Review, review_id)
+    if not review:
+        from app.core.exceptions import NotFoundError
+        raise NotFoundError(detail="Review not found")
+    return {
+        "data": {
+            "id": str(review.id),
+            "tutor_id": str(review.tutor_id),
+            "rating": review.rating,
+            "text": review.text,
+            "is_deleted": review.is_deleted,
+            "deleted_at": review.deleted_at.isoformat() if review.deleted_at else None,
+            "admin_deletion_reason": review.admin_deletion_reason,
+            "created_at": review.created_at.isoformat(),
+        }
+    }
+
+
 @router.delete("/{review_id}", response_model=SuccessResponse)
 async def delete_review(
     review_id: uuid.UUID,

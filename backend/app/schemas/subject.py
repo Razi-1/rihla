@@ -17,7 +17,9 @@ class SubjectResponse(BaseModel):
     category_id: uuid.UUID
     name: str
     display_order: int
-    available_levels: list["EducationLevelResponse"] = []
+    available_levels: list["EducationLevelResponse"] = Field(
+        default=[], validation_alias="level_availability"
+    )
 
     model_config = {"from_attributes": True}
 

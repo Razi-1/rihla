@@ -24,5 +24,6 @@ class ChildSummaryResponse(BaseModel):
 class ParentDashboardResponse(BaseModel):
     children: list[ChildSummaryResponse] = []
     pending_permissions: int = 0
+    upcoming_sessions_total: int = 0
 
     model_config = {"from_attributes": True}

@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import Uuid, CheckConstraint, DateTime, ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -31,7 +31,7 @@ class Enrolment(Base):
     )
     enrolled_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(__import__("datetime").timezone.utc),
+        default=lambda: datetime.now(timezone.utc),
         nullable=False,
     )
     opted_out_at: Mapped[datetime | None] = mapped_column(

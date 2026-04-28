@@ -2,7 +2,7 @@ import logging
 import uuid
 from datetime import datetime, timedelta, timezone
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import ConflictError, ForbiddenError, NotFoundError, ValidationError
@@ -100,6 +100,71 @@ async def get_children(
     return children
 
 
+async def get_child_detail(
+    db: AsyncSession, parent_id: uuid.UUID, student_id: uuid.UUID
+) -> dict:
+    result = await db.execute(
+        select(ParentStudentLink, Account)
+        .join(Account, ParentStudentLink.student_id == Account.id)
+        .where(
+            ParentStudentLink.parent_id == parent_id,
+            ParentStudentLink.student_id == student_id,
+        )
+    )
+    row = result.one_or_none()
+    if not row:
+        raise NotFoundError(detail="Child not found or not linked")
+    link, account = row
+
+    from app.models.enrolment import Enrolment
+    from app.models.session import Session
+
+    enrolment_result = await db.execute(
+        select(Session)
+        .join(Enrolment, Enrolment.session_id == Session.id)
+        .where(
+            Enrolment.student_id == student_id,
+            Enrolment.status == "active",
+        )
+    )
+    sessions = enrolment_result.scalars().all()
+
+    permission_result = await db.execute(
+        select(ParentTutorPermission).where(
+            ParentTutorPermission.parent_id == parent_id,
+            ParentTutorPermission.student_id == student_id,
+        )
+    )
+    permissions = permission_result.scalars().all()
+
+    return {
+        "student_id": account.id,
+        "first_name": account.first_name,
+        "last_name": account.last_name,
+        "email": account.email,
+        "profile_picture_url": account.profile_picture_url,
+        "link_status": link.status,
+        "classes": [
+            {
+                "id": str(s.id),
+                "title": s.title,
+                "session_type": s.session_type,
+                "start_time": s.start_time.isoformat() if s.start_time else None,
+            }
+            for s in sessions
+        ],
+        "permissions": [
+            {
+                "id": str(p.id),
+                "tutor_id": str(p.tutor_id),
+                "permission_type": p.permission_type,
+                "status": p.status,
+            }
+            for p in permissions
+        ],
+    }
+
+
 async def update_permission(
     db: AsyncSession,
     permission_id: uuid.UUID,
@@ -131,3 +196,33 @@ async def get_pending_permissions(
         )
     )
     return list(result.scalars().all())
+
+
+async def count_upcoming_sessions(
+    db: AsyncSession, parent_id: uuid.UUID
+) -> int:
+    """Count upcoming sessions across all actively linked children."""
+    from app.models.enrolment import Enrolment
+    from app.models.session import Session
+
+    result = await db.execute(
+        select(ParentStudentLink.student_id).where(
+            ParentStudentLink.parent_id == parent_id,
+            ParentStudentLink.status == "active",
+        )
+    )
+    student_ids = [row[0] for row in result.all()]
+
+    if not student_ids:
+        return 0
+
+    count_result = await db.execute(
+        select(func.count(Session.id))
+        .join(Enrolment, Enrolment.session_id == Session.id)
+        .where(
+            Enrolment.student_id.in_(student_ids),
+            Enrolment.status == "active",
+            Session.start_time > datetime.now(timezone.utc),
+        )
+    )
+    return count_result.scalar() or 0

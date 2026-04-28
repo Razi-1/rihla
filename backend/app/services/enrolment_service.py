@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.core.exceptions import ForbiddenError, NotFoundError, ValidationError
 from app.models.enrolment import Enrolment
@@ -16,6 +17,7 @@ async def get_student_enrolments(
 ) -> list[Enrolment]:
     result = await db.execute(
         select(Enrolment)
+        .options(selectinload(Enrolment.session))
         .where(
             Enrolment.student_id == student_id,
             Enrolment.status == "active",

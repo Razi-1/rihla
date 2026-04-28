@@ -80,8 +80,8 @@ async def register(db: AsyncSession, data: RegisterRequest) -> tuple[Account, st
         - dob.year
         - ((today.month, today.day) < (dob.month, dob.day))
     )
-    if age < 7 or age > 100:
-        raise ValidationError(detail="Age must be between 7 and 100")
+    if age < 8 or age > 89:
+        raise ValidationError(detail="Age must be between 8 and 89")
 
     gender = data.gender or gender_extracted
     is_age_restricted = age < 15 and data.account_type == "student"

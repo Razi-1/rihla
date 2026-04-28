@@ -45,6 +45,7 @@ const Calendar = lazy(() => import('@/pages/shared/Calendar'));
 const ChatList = lazy(() => import('@/pages/shared/ChatList'));
 const ChatConversation = lazy(() => import('@/pages/shared/ChatConversation'));
 const VideoCall = lazy(() => import('@/pages/shared/VideoCall'));
+const MySessions = lazy(() => import('@/pages/shared/MySessions'));
 const Settings = lazy(() => import('@/pages/shared/Settings'));
 const Notifications = lazy(() => import('@/pages/shared/Notifications'));
 const HelpSupport = lazy(() => import('@/pages/shared/HelpSupport'));
@@ -158,6 +159,7 @@ export default function App() {
               <Route path="/calendar" element={<Calendar />} />
               <Route path="/chat" element={<ChatList />} />
               <Route path="/chat/:roomId" element={<ChatConversation />} />
+              <Route path="/sessions" element={<MySessions />} />
               <Route path="/video/:roomName" element={<VideoCall />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/notifications" element={<Notifications />} />

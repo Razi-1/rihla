@@ -42,13 +42,14 @@ export default function AdminProfilePage() {
     setLoading(true);
     setMessage(null);
     try {
-      await api.put('/profile/password', {
+      await api.put('/auth/password', {
         current_password: data.current_password,
         new_password: data.new_password,
       });
       setMessage({ type: 'success', text: 'Password changed successfully' });
       reset();
-    } catch {
+    } catch (err) {
+      console.error('[AdminProfile] Password change failed:', err);
       setMessage({ type: 'error', text: 'Failed to change password. Check your current password.' });
     } finally {
       setLoading(false);

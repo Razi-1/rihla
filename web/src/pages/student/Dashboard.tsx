@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { BookOpen, Calendar, Mail, Clock, Search } from 'lucide-react';
+import { BookOpen, Calendar, Mail, Clock, Search, Users } from 'lucide-react';
 import PageTransition from '@/components/common/PageTransition';
 import Button from '@/components/common/Button';
 import Skeleton from '@/components/common/Skeleton';
 import { studentService } from '@/services/studentService';
 import { formatDateTime } from '@/utils/formatters';
+import { SESSION_TYPES } from '@/utils/constants';
 import { staggerContainer, staggerItem } from '@/hooks/useAnimations';
 import type { StudentDashboard } from '@/types/student';
 import styles from '../shared/DashboardPage.module.css';
@@ -18,7 +19,7 @@ export default function Dashboard() {
   useEffect(() => {
     studentService.getDashboard()
       .then((res) => setData(res.data.data))
-      .catch(() => {})
+      .catch((err) => console.error('[StudentDashboard] Failed to load:', err))
       .finally(() => setLoading(false));
   }, []);
 
@@ -59,6 +60,27 @@ export default function Dashboard() {
                 <h3>{data.next_session.title}</h3>
                 <p><Clock size={14} strokeWidth={1.5} /> {formatDateTime(data.next_session.start_time)}</p>
                 <p>with {data.next_session.tutor_name}</p>
+              </div>
+            )}
+
+            {data?.active_classes_list && data.active_classes_list.length > 0 && (
+              <div className={styles.section} style={{ marginTop: 'var(--space-6)' }}>
+                <div className={styles.sectionHeader}>
+                  <h2>Active Classes</h2>
+                </div>
+                <motion.div variants={staggerContainer} initial="initial" animate="animate">
+                  {data.active_classes_list.map((cls) => (
+                    <motion.div key={cls.id} variants={staggerItem} className={styles.listItem}>
+                      <Users size={16} strokeWidth={1.5} color="var(--color-primary-blue)" />
+                      <div className={styles.listItemContent}>
+                        <div className={styles.listItemTitle}>{cls.title}</div>
+                        <div className={styles.listItemSub}>
+                          with {cls.tutor_name} &middot; {SESSION_TYPES[cls.session_type as keyof typeof SESSION_TYPES] ?? cls.session_type}
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </motion.div>
               </div>
             )}
 

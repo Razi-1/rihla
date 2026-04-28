@@ -2,13 +2,15 @@ import api from '@/lib/axios';
 import axios from 'axios';
 import type { EducationLevel, SubjectCategory } from '@/types/admin';
 
+const backendBase = import.meta.env.VITE_API_BASE_URL || '';
+
 export async function getSubjectCategories(): Promise<SubjectCategory[]> {
-  const res = await axios.get<SubjectCategory[]>('/api/v1/subjects/categories');
+  const res = await axios.get<SubjectCategory[]>(`${backendBase}/api/v1/subjects/categories`);
   return res.data;
 }
 
 export async function getEducationLevels(): Promise<EducationLevel[]> {
-  const res = await axios.get<EducationLevel[]>('/api/v1/education-levels');
+  const res = await axios.get<EducationLevel[]>(`${backendBase}/api/v1/subjects/education-levels`);
   return res.data;
 }
 

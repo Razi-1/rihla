@@ -25,6 +25,16 @@ const navItems = [
 export function AdminSidebar() {
   const { account, logout } = useAuthStore();
 
+  const handleLogout = async () => {
+    try {
+      const { default: api } = await import('@/lib/axios');
+      await api.post('/auth/logout');
+    } catch (err) {
+      console.error('[AdminSidebar] Backend logout failed:', err);
+    }
+    logout();
+  };
+
   return (
     <aside className={styles.sidebar}>
       <div className={styles.brand}>
@@ -64,7 +74,7 @@ export function AdminSidebar() {
             <span className={styles.adminRole}>Administrator</span>
           </div>
         </div>
-        <button className={styles.logoutBtn} onClick={logout} title="Sign out">
+        <button className={styles.logoutBtn} onClick={handleLogout} title="Sign out">
           <LogOut size={16} strokeWidth={1.5} />
         </button>
       </div>

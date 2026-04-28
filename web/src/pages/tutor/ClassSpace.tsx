@@ -30,7 +30,7 @@ export default function ClassSpace() {
     ]).then(([sessionRes, attendanceRes]) => {
       setSession(sessionRes.data.data);
       setAttendance(attendanceRes.data.data);
-    }).finally(() => setLoading(false));
+    }).catch((err) => console.error('[ClassSpace] Failed to load:', err)).finally(() => setLoading(false));
   }, [id]);
 
   const handleDelete = async () => {
@@ -39,7 +39,7 @@ export default function ClassSpace() {
     try {
       await sessionService.delete(id);
       window.history.back();
-    } catch { /* ignore */ }
+    } catch (err) { console.error('[ClassSpace] Failed to delete session:', err); }
     setDeleting(false);
   };
 
@@ -47,8 +47,16 @@ export default function ClassSpace() {
     if (!id) return;
     try {
       const res = await attendanceService.generateQR(id);
-      window.open(`data:image/png;base64,${res.data.data.qr_data}`, '_blank');
-    } catch { /* ignore */ }
+      const payload = res.data.data ?? (res.data as unknown as { qr_image_base64: string });
+      const qrData = payload?.qr_image_base64;
+      if (qrData) {
+        window.open(`data:image/png;base64,${qrData}`, '_blank');
+      } else {
+        console.error('[ClassSpace] QR response missing qr_image_base64:', res.data);
+      }
+    } catch (err) {
+      console.error('[ClassSpace] Failed to generate QR code:', err);
+    }
   };
 
   if (loading) return <PageTransition><Skeleton width="100%" height={400} borderRadius="var(--radius-md)" /></PageTransition>;
@@ -70,7 +78,7 @@ export default function ClassSpace() {
           </div>
 
           <div style={{ display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap' }}>
-            {session.mode !== 'physical' && <Button icon={<Video size={16} strokeWidth={1.5} />} onClick={() => window.open(`/video/${session.jitsi_room_name}`, '_blank')}>Join Video</Button>}
+            {session.mode !== 'physical' && session.jitsi_room_name && <Button icon={<Video size={16} strokeWidth={1.5} />} onClick={() => window.open(`/video/${session.jitsi_room_name}?session=${id}`, '_blank')}>Join Video</Button>}
             <Button variant="secondary" icon={<QrCode size={16} strokeWidth={1.5} />} onClick={handleGenerateQR}>Generate QR</Button>
             <Button variant="danger" icon={<Trash2 size={16} strokeWidth={1.5} />} onClick={() => setShowDelete(true)}>Cancel Class</Button>
           </div>

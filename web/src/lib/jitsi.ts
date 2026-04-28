@@ -20,9 +20,34 @@ declare global {
 }
 
 const JITSI_DOMAIN = 'localhost:8443';
+const JITSI_SCRIPT_URL = `https://${JITSI_DOMAIN}/external_api.js`;
 
-export function createJitsiMeeting(config: JitsiConfig): JitsiApi | null {
-  if (typeof window.JitsiMeetExternalAPI === 'undefined') return null;
+let scriptLoadPromise: Promise<boolean> | null = null;
+
+function loadJitsiScript(): Promise<boolean> {
+  if (typeof window.JitsiMeetExternalAPI !== 'undefined') return Promise.resolve(true);
+  if (scriptLoadPromise) return scriptLoadPromise;
+
+  scriptLoadPromise = new Promise((resolve) => {
+    const existing = document.querySelector(`script[src="${JITSI_SCRIPT_URL}"]`);
+    if (existing) existing.remove();
+
+    const script = document.createElement('script');
+    script.src = JITSI_SCRIPT_URL;
+    script.async = true;
+    script.onload = () => resolve(true);
+    script.onerror = () => {
+      scriptLoadPromise = null;
+      resolve(false);
+    };
+    document.head.appendChild(script);
+  });
+  return scriptLoadPromise;
+}
+
+export async function createJitsiMeeting(config: JitsiConfig): Promise<JitsiApi | null> {
+  const loaded = await loadJitsiScript();
+  if (!loaded || typeof window.JitsiMeetExternalAPI === 'undefined') return null;
 
   const api = new window.JitsiMeetExternalAPI(JITSI_DOMAIN, {
     roomName: config.roomName,

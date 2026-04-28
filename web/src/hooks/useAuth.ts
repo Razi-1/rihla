@@ -16,9 +16,15 @@ export function useAuth() {
   }, [setAuth, navigate]);
 
   const register = useCallback(async (data: RegisterRequest) => {
-    await authService.register(data);
-    navigate('/login?registered=true');
-  }, [navigate]);
+    const res = await authService.register(data);
+    const { access_token, account } = res.data.data;
+    if (access_token && account) {
+      setAuth(account, access_token);
+      navigate(`/${account.account_type}/dashboard`);
+    } else {
+      navigate('/login?registered=true');
+    }
+  }, [setAuth, navigate]);
 
   const logout = useCallback(async () => {
     try { await authService.logout(); } catch { /* ignore */ }

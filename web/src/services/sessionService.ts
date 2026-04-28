@@ -20,4 +20,13 @@ export const sessionService = {
 
   requestJoin: (sessionId: string) =>
     api.post<SuccessResponse>(`/sessions/${sessionId}/request-join`),
+
+  getJitsiToken: (sessionId: string) =>
+    api.get<ApiResponse<{ token: string; room_name: string; domain: string }>>(`/sessions/${sessionId}/jitsi-token`),
+
+  cancelBooking: (sessionId: string) =>
+    api.post<SuccessResponse>(`/sessions/${sessionId}/cancel-booking`),
+
+  bookMeeting: (data: { tutor_id: string; start_time: string; duration_minutes: number; title?: string; mode?: string }) =>
+    api.post<ApiResponse<Session>>('/sessions/book-meeting', data),
 };

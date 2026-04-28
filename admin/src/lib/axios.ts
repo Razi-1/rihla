@@ -18,20 +18,7 @@ api.interceptors.request.use((config) => {
 });
 
 api.interceptors.response.use(
-  (response) => {
-    if (
-      response.data &&
-      typeof response.data === 'object' &&
-      !Array.isArray(response.data) &&
-      !('data' in response.data)
-    ) {
-      response.data = { data: response.data };
-    }
-    if (Array.isArray(response.data)) {
-      response.data = { data: response.data };
-    }
-    return response;
-  },
+  (response) => response,
   async (error) => {
     const original = error.config;
     if (error.response?.status === 401 && !original._retry) {
